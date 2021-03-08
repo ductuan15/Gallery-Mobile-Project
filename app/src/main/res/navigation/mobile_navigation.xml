@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/navigation_allpic">
+
+    <fragment
+        android:id="@+id/navigation_allpic"
+        android:name="com.example.galleryproject.ui.allpic.AllPicFragment"
+        android:label="@string/title_allpic"
+        tools:layout="@layout/fragment_allpic" />
+
+    <fragment
+        android:id="@+id/navigation_allalbum"
+        android:name="com.example.galleryproject.ui.album.AllAlbumFragment"
+        android:label="@string/title_allalbums"
+        tools:layout="@layout/fragment_allalbum" />
+
+    <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.example.galleryproject.ui.notifications.NotificationsFragment"
+        android:label="@string/title_notifications"
+        tools:layout="@layout/fragment_notifications" />
+</navigation>

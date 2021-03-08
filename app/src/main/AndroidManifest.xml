@@ -9,7 +9,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GalleryProject">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".EditPic"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_edit_pic"
+            android:theme="@style/Theme.GalleryProject.Fullscreen"></activity>
+        <activity
+            android:name=".ViewPicture"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_view_picture"
+            android:theme="@style/Theme.GalleryProject.Fullscreen" />
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">GalleryProject</string>
+    <string name="title_allpic">All pictures</string>
+    <string name="title_allalbums">Albums</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_slideshow">Slide Show</string>
+    <string name="title_selectall">Select All</string>
+    <string name="title_gotocam">Go to camera</string>
+    <string name="title_activity_view_picture">FullscreenActivity</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_edit_pic">FullscreenActivity</string>
+    <string name="title_detail">Detail</string>
+    <string name="title_set_as_wallpaper">Set as wallpaper</string>
 </resources>

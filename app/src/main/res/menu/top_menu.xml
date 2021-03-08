@@ -2,17 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/goto_cam"
+        android:id="@+id/slideshow_opt"
+        android:title="@string/title_slideshow">
+    </item>
+    <item
+        android:id="@+id/selectall"
+        android:title="@string/title_selectall">
+    </item>
+    <item
+        android:id="@+id/gotocam"
         android:icon="@drawable/ic_baseline_camera_alt_24"
-        app:showAsAction="ifRoom"
-        android:title="Go to camera">
-    </item>
-    <item
-        android:id="@+id/slideshow_Opt"
-        android:title="Slideshow">
-    </item>
-    <item
-        android:id="@+id/select_all"
-        android:title="Select all">
+        app:showAsAction="always"
+        android:title="@string/title_gotocam">
     </item>
 </menu>
