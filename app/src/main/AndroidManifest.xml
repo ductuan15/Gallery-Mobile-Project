@@ -13,7 +13,7 @@
             android:name=".EditPic"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_edit_pic"
-            android:theme="@style/Theme.GalleryProject.Fullscreen"></activity>
+            android:theme="@style/Theme.GalleryProject.Fullscreen"/>
         <activity
             android:name=".ViewPicture"
             android:configChanges="orientation|keyboardHidden|screenSize"
