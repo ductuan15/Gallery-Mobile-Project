@@ -29,4 +29,6 @@
             Dark
         </item>
     </string-array>
+    <string name="lock">Lock</string>
+    <string name="copy">Copy</string>
 </resources>
