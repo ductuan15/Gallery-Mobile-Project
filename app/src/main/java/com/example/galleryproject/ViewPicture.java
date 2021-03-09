@@ -119,7 +119,7 @@ public class ViewPicture extends AppCompatActivity {
         // while interacting with the UI.
         findViewById(R.id.edit_button).setOnTouchListener(mDelayHideTouchListener);
         findViewById(R.id.delete_button).setOnTouchListener(mDelayHideTouchListener);
-        findViewById(R.id.lock_button).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.favorite_button).setOnTouchListener(mDelayHideTouchListener);
         findViewById(R.id.share_button).setOnTouchListener(mDelayHideTouchListener);
 
 

@@ -8,10 +8,21 @@
         app:showAsAction="always">
     </item>
     <item
+        android:id="@+id/lock_picture"
+        android:icon="@drawable/ic_baseline_lock_24"
+        android:title="@string/title_lock"
+        app:showAsAction="always">
+    </item>
+    <item
         android:id="@+id/detail_button"
         android:title="@string/title_detail">
     </item>
     <item
         android:id="@+id/setWallpaper_button"
-        android:title="@string/title_set_as_wallpaper"></item>
+        android:title="@string/title_set_as_wallpaper">
+    </item>
+    <item
+        android:id="@+id/copy_button"
+        android:title="@string/title_copy">
+    </item>
 </menu>

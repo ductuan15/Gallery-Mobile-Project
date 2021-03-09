@@ -19,6 +19,6 @@
 
     <fragment
         android:id="@+id/navigation_setting"
-        android:name="com.example.galleryproject.ui.notifications.SettingFragment"
+        android:name="com.example.galleryproject.ui.setting.SettingFragment"
         android:label="@string/title_setting"/>
 </navigation>
