@@ -11,4 +11,6 @@
     <string name="title_activity_edit_pic">FullscreenActivity</string>
     <string name="title_detail">Detail</string>
     <string name="title_set_as_wallpaper">Set as wallpaper</string>
+    <string name="lock">Lock</string>
+    <string name="copy">Copy</string>
 </resources>

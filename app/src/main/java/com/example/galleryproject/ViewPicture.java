@@ -122,6 +122,7 @@ public class ViewPicture extends AppCompatActivity {
         findViewById(R.id.lock_button).setOnTouchListener(mDelayHideTouchListener);
         findViewById(R.id.share_button).setOnTouchListener(mDelayHideTouchListener);
 
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
