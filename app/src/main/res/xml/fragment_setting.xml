@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="true"
+        android:entries="@array/Languages"
+        android:entryValues="@array/Languages"
+        android:key="language_selection"
+        android:title="Language" />
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/Theme"
+        android:entryValues="@array/Theme"
+        android:key="theme_selection"
+        android:title="Change theme" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="set_default_app"
+        android:title="@string/title_set_default_app" />
+
+</androidx.preference.PreferenceScreen>
