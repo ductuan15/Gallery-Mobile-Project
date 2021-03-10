@@ -27,7 +27,7 @@ public class AllPicFragment extends Fragment {
         allPicViewModel =
                 new ViewModelProvider(this).get(AllPicViewModel.class);
         View root = inflater.inflate(R.layout.fragment_allpic, container, false);
-        int colNum = 3;
+        int colNum = 4;
         String [] data= {"1","","","","","","","","","","","","","","","","","","","","","","","","",""};
         ThumbnailPictureAdapter thumbnailPictureAdapter = new ThumbnailPictureAdapter(data);
         this.thumbnailPic_GridView =  root.findViewById(R.id.grid_view_thumbnail_pic);
