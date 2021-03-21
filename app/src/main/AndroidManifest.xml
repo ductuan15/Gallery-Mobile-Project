@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.galleryproject">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:remove="android:maxSdkVersion"/>
+
     <application
+
         android:allowBackup="true"
         android:icon="@mipmap/game_lauchericon"
         android:label="@string/app_name"
@@ -11,12 +16,10 @@
         android:theme="@style/Theme.GalleryProject">
         <activity
             android:name=".EditPic"
-            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_edit_pic"
             android:theme="@style/Theme.GalleryProject.Fullscreen"/>
         <activity
             android:name=".ViewPicture"
-            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_view_picture"
             android:theme="@style/Theme.GalleryProject.Fullscreen"
             android:exported="true"/>
@@ -25,7 +28,6 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder> {
@@ -24,7 +25,9 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
             super(itemView);
             //TODO: Implement click listener
             this.imageView = (ImageView) itemView.findViewById(R.id.thumbnail_album_holder);
+
             this.albumNameTextView = (TextView) itemView.findViewById(R.id.album_name_holder);
+
         }
         public ImageView getImageView(){
             return this.imageView;
@@ -44,6 +47,7 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     @Override
     public ThumbnailAlbumViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_album,parent,false);
+
         return new ThumbnailAlbumViewHolder(view);
     }
 
@@ -51,7 +55,7 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     @Override
     public void onBindViewHolder(@NonNull ThumbnailAlbumViewHolder holder, int position) {
         // TODO:replace the image that we need
-        holder.getImageView().setImageResource(R.drawable.game_lauchericon_background);
+        holder.getImageView().setImageResource(R.drawable.ic_noun_cat_search_232263);
         // TODO: replace by the name of albums
         holder.getAlbumNameTextView().setText("Album name");
     }
