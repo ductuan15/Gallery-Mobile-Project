@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:text="@string/titlle_my_album"
             android:textStyle="bold"
-            android:textSize="25dp"
+            android:textSize="25sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="33dp"
             android:text="@string/title_people_location"
-            android:textSize="25dp"
+            android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"

@@ -2,10 +2,14 @@ package com.example .galleryproject;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.GridView;
@@ -22,18 +26,32 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
 
     private final int read_external_storage_resquest_code = 1;
+
+    String currentLanguage ="en";       //value
+    Locale myLocale;
+    String currentLang;                 //key intent
+    SharedPreferences preferences;
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        currentLanguage = preferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
+        setLocale(currentLanguage);
+
         setContentView(R.layout.activity_main);
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -95,5 +113,16 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.top_menu,menu);
         return true;
+    }
+
+    public void setLocale(String localeName) {
+//        if (!localeName.equals(currentLanguage)) {
+            Locale myLocale = new Locale(localeName);
+            Resources res = getResources();                                                         //get resource of app
+            DisplayMetrics dm = res.getDisplayMetrics();
+            Configuration conf = res.getConfiguration();
+            conf.locale = myLocale;
+            res.updateConfiguration(conf, dm);
+
     }
 }

@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">GalleryProject</string>
+    <string name="title_allpic">Tất cả ảnh</string>
+    <string name="title_allalbums">Albums</string>
+    <string name="title_setting">Cài đặt</string>
+    <string name="title_slideshow">Trình chiếu</string>
+    <string name="title_selectall">Chọn tất cả</string>
+    <string name="title_gotocam">Đi tới máy ảnh</string>
+    <string name="title_activity_view_picture">FullscreenActivity</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_edit_pic">FullscreenActivity</string>
+    <string name="title_detail">Chi tiết</string>
+    <string name="title_set_as_wallpaper">Đặt làm hình nền</string>
+    <string name="title_location_tag">Thêm địa diểm</string>
+    <string name="title_set_default_app">Đặt làm ứng dụng mặc định</string>
+    <string-array name="Languages">
+        <item name = "English">
+            Tiếng anh
+        </item>
+        <item name = "Việt Nam">
+            Tiếng việt
+        </item>
+    </string-array>
+
+    <string-array name="Theme">
+        <item name = "light_theme">
+            Giao diện sáng
+        </item>
+        <item name = "dark_theme">
+            Giao diện sáng
+        </item>
+    </string-array>
+    <string name="lock">Khoá</string>
+    <string name="copy">Sao chép</string>
+    <string name="title_copy">Copy</string>
+    <string name="title_lock">Khoá</string>
+    <string name="titlle_my_album">Album của tôi</string>
+    <string name="title_people_location">Người và Địa diểm</string>
+    <string name="title_change_Language">Ngôn ngữ</string>
+    <string name="title_change_Theme">Giao diện</string>
+</resources>
