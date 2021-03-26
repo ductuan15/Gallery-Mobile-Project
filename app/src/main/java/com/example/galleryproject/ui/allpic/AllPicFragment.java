@@ -1,6 +1,7 @@
 package com.example.galleryproject.ui.allpic;
 
 import android.content.ContentUris;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
@@ -10,6 +11,8 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -20,13 +23,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryproject.R;
 import com.example.galleryproject.ThumbnailPictureAdapter;
+import com.example.galleryproject.ViewPicture;
 
 import java.util.ArrayList;
 
-public class AllPicFragment extends Fragment {
+public class AllPicFragment extends Fragment implements AdapterView.OnItemClickListener {
 
     private AllPicViewModel allPicViewModel;
     private RecyclerView thumbnailPic_GridView;
+    private ThumbnailPictureAdapter mThumbnailPictureAdapter;
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -34,7 +39,7 @@ public class AllPicFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         allPicViewModel = new ViewModelProvider(this).get(AllPicViewModel.class);
         View root = inflater.inflate(R.layout.fragment_allpic, container, false);
-        int colNum = 4;
+        int colNum = 3;
         int orientation = getActivity().getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             colNum = 8;
@@ -44,11 +49,15 @@ public class AllPicFragment extends Fragment {
         ArrayList<Uri> uriArrayList = this.getAllPic();
 
 
-        ThumbnailPictureAdapter thumbnailPictureAdapter = new ThumbnailPictureAdapter(uriArrayList, this);
+        // set this fragment as a listener
+        ThumbnailPictureAdapter thumbnailPictureAdapter = new ThumbnailPictureAdapter(uriArrayList, this.getContext(),this);
+        this.mThumbnailPictureAdapter = thumbnailPictureAdapter;
         this.thumbnailPic_GridView = root.findViewById(R.id.grid_view_thumbnail_pic);
         this.thumbnailPic_GridView.setHasFixedSize(true);
         this.thumbnailPic_GridView.setLayoutManager(new GridLayoutManager(getActivity(), colNum));
-        this.thumbnailPic_GridView.setAdapter(thumbnailPictureAdapter);
+        this.thumbnailPic_GridView.setAdapter(this.mThumbnailPictureAdapter);
+
+
         return root;
 
     }
@@ -106,6 +115,18 @@ public class AllPicFragment extends Fragment {
         }
         return uriArrayList;
 
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Uri img = this.mThumbnailPictureAdapter.getItem(position);
+        Intent imgView = new Intent(this.getContext(), ViewPicture.class);
+        Bundle data = new Bundle();
+        String uriString = img.toString();
+        data.putString("uriImgString",uriString);
+
+        imgView.putExtras(data);
+        startActivity(imgView);
     }
 }
 

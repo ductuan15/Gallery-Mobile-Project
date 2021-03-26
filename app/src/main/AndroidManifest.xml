@@ -21,7 +21,6 @@
         <activity
             android:name=".ViewPicture"
             android:label="@string/title_activity_view_picture"
-            android:theme="@style/Theme.GalleryProject.Fullscreen"
             android:exported="true"/>
         <activity
             android:name=".MainActivity"
