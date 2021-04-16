@@ -42,4 +42,5 @@
     <string name="title_people_location">People and Location</string>
     <string name="title_change_Theme">Change theme</string>
     <string name="language_key" translatable="false">language_selection</string>
+    <string name="theme_key" translatable="false">theme_selection</string>
 </resources>
