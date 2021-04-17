@@ -21,9 +21,10 @@
             android:label="@string/title_activity_edit_pic"
             android:theme="@style/Theme.GalleryProject.Fullscreen"/>
         <activity
-            android:name=".ViewPicture"
+            android:name=".SlideMediaActivity"
             android:label="@string/title_activity_view_picture"
-            android:exported="true"/>
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
         <activity
             android:name=".MainActivity"
             android:configChanges="locale"
