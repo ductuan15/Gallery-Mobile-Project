@@ -15,10 +15,10 @@
     <string name="title_set_default_app">Set as default app</string>
     <string name="title_change_Language">Language</string>
     <string-array name="Languages">
-        <item name="English">
+        <item name = "English">
             English
         </item>
-        <item name="Vietnamese">
+        <item name = "Vietnamese">
             Vietnamese
         </item>
     </string-array>
@@ -27,10 +27,10 @@
         <item>"vi"</item>
     </string-array>
     <string-array name="Theme">
-        <item name="light_theme">
+        <item name = "light_theme">
             Light
         </item>
-        <item name="dark_theme">
+        <item name = "dark_theme">
             Dark
         </item>
     </string-array>
@@ -42,5 +42,4 @@
     <string name="title_people_location">People and Location</string>
     <string name="title_change_Theme">Change theme</string>
     <string name="language_key" translatable="false">language_selection</string>
-    <string name="theme_key" translatable="false">theme_selection</string>
 </resources>
