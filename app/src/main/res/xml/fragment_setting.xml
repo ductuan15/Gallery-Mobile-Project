@@ -12,7 +12,7 @@
         android:defaultValue="1"
         android:entries="@array/Theme"
         android:entryValues="@array/Theme"
-        android:key="theme_selection"
+        android:key="@string/theme_key"
         android:title="@string/title_change_Theme" />
     <SwitchPreference
         android:defaultValue="false"

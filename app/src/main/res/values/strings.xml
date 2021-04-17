@@ -42,6 +42,10 @@
     <string name="title_people_location">People and Location</string>
     <string name="title_change_Theme">Change theme</string>
     <string name="language_key" translatable="false">language_selection</string>
+<<<<<<< HEAD
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+=======
+    <string name="theme_key" translatable="false">theme_selection</string>
+>>>>>>> e94105136487dd3f6b0259b326db8fd2972d1a63
 </resources>

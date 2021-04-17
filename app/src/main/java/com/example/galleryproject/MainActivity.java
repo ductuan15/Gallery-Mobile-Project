@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private final int read_external_storage_resquest_code = 1;
 
     String currentLanguage ="en";       //value
+    String currentTheme = "Light";
     Locale myLocale;
     String currentLang;                 //key intent
     SharedPreferences preferences;
@@ -51,6 +53,14 @@ public class MainActivity extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         currentLanguage = preferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
         setLocale(currentLanguage);
+
+
+        currentTheme = preferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference language_key
+        switch (currentTheme){
+            case "Light": AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); break;
+            case "Dark": AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES); break;
+        }
+
 
         setContentView(R.layout.activity_main);
 

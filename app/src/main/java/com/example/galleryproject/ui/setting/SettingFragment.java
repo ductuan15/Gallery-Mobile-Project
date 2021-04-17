@@ -33,7 +33,15 @@ public class SettingFragment extends PreferenceFragmentCompat {
         preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());              //get preference
 
         list_theme = (ListPreference) findPreference("theme_selection");
-        String currValue = list_theme.getValue();
+        list_theme.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Intent refresh = new Intent(requireContext(), MainActivity.class);                  //use intent to restart activity
+                startActivity(refresh);
+                requireActivity().finish();
+                return true;
+            }
+        });
 
         list_lang = (ListPreference) findPreference("language_selection");                     //get ListPreference
 
