@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
+
 
 import java.io.IOException;
 import java.util.ArrayList;

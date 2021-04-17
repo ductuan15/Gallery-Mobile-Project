@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:fillViewport="true">
 
-    <ImageView
+    <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
         android:id="@+id/image_viewed"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         tools:srcCompat="@tools:sample/backgrounds/scenic"
-        android:contentDescription="TODO" />
+        android:contentDescription="TODO"
+        tools:ignore="ScrollViewSize" />
 </ScrollView>

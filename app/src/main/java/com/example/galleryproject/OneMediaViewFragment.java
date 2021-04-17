@@ -2,23 +2,33 @@ package com.example.galleryproject;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
+import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
+import com.github.chrisbanes.photoview.OnMatrixChangedListener;
+import com.github.chrisbanes.photoview.OnScaleChangedListener;
+import com.github.chrisbanes.photoview.PhotoView;
 
 import java.util.zip.Inflater;
 
-public class OneMediaViewFragment extends Fragment {
+public class OneMediaViewFragment extends Fragment  {
     Uri uri;
+    SubsamplingScaleImageView photoView;
+    boolean isZoomed = false;
 
     public OneMediaViewFragment(Uri uri) {
         this.uri = uri;
@@ -36,11 +46,29 @@ public class OneMediaViewFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_view_one_media, container, false);
-        Glide.with(this)
-            .load(this.uri)
-            .fitCenter()
-            .error(R.drawable.ic_noun_cat_search_232263)
-            .into((ImageView) root.findViewById(R.id.image_viewed));
+        this.photoView = root.findViewById(R.id.image_viewed);
+        this.photoView.setMaxScale(10.0f);
+        //TODO: Fix the scale
+        this.photoView.setDoubleTapZoomScale(2.0f);
+        this.photoView.setImage(ImageSource.uri(this.uri));
         return root;
     }
+
+
+
+
+
+
+//    @Override
+//    public void onScaleChange(float scaleFactor, float focusX, float focusY) {
+//        if(!this.isZoomed){
+//            this.isZoomed = true;
+//            Glide.with(this).asBitmap()
+//                    .load(this.uri)
+//                    .error(R.drawable.ic_noun_cat_search_232263)
+//                    .into(this.photoView);
+//        }
+//        Log.e("TAG", "onScaleChange: ");
+//        return;
+//    }
 }

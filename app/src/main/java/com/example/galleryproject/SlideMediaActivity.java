@@ -16,7 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.example.galleryproject.data.ImageInfo;
-import com.squareup.picasso.Picasso;
+
 
 import java.util.ArrayList;
 
@@ -39,7 +39,6 @@ public class SlideMediaActivity extends FragmentActivity {
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         bundle.getInt("imgPos");
-
         this.viewPager  = findViewById(R.id.media_viewpager);
         this.uriArrayList =  ImageInfo.getAllPic(this);
         pagerAdapter = new SlideMediaAdapter(this);
