@@ -38,7 +38,6 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
 
         public ThumbnailPictureViewHolder(@NonNull View itemView,AdapterView.OnItemClickListener onItemClickListener) {
             super(itemView);
-            //TODO: Implement click listener
             this.imageView = itemView.findViewById(R.id.thumbnail_pic_holder);
             this.imageView.setOnClickListener(this);
 
@@ -55,7 +54,6 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
         }
     }
 
-    // TODO: get all image
     public ThumbnailPictureAdapter(ArrayList<Uri> uriArrayList, Context context, AdapterView.OnItemClickListener onItemClickListener) {
         this.uriArrayList = uriArrayList;
         this.context = context;
@@ -75,7 +73,6 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
     @Override
     // get element  according to position
     public void onBindViewHolder(@NonNull ThumbnailPictureViewHolder holder, int position) {
-        // TODO:replace the image that we need
         String url = this.uriArrayList.get(position).toString();
         Glide.with(this.context)
                 .load(url)
