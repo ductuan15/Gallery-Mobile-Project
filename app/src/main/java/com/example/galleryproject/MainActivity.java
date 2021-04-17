@@ -1,6 +1,7 @@
 package com.example .galleryproject;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,9 +10,11 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.Toast;
@@ -38,7 +41,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private final int read_external_storage_resquest_code = 1;
-
+    static final int REQUEST_IMAGE_CAPTURE = 2;
     String currentLanguage ="en";       //value
     String currentTheme = "Light";
     Locale myLocale;
@@ -125,7 +128,25 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void setLocale(String localeName) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.slideshow_opt:
+
+                return true;
+            case R.id.selectall:
+
+                return true;
+            case R.id.gotocam:
+                dispatchTakePictureIntent();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void setLocale(String localeName) {                                                      //set locale of current locale
 //        if (!localeName.equals(currentLanguage)) {
             Locale myLocale = new Locale(localeName);
             Resources res = getResources();                                                         //get resource of app
@@ -133,6 +154,16 @@ public class MainActivity extends AppCompatActivity {
             Configuration conf = res.getConfiguration();
             conf.locale = myLocale;
             res.updateConfiguration(conf, dm);
+    }
 
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } catch (ActivityNotFoundException e) {
+            // display error state to the user
+            Toast.makeText(MainActivity.this, "Can't use camera", Toast.LENGTH_SHORT).show();
+        }
     }
 }
