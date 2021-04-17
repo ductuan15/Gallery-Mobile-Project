@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,8 +79,10 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
         String url = this.uriArrayList.get(position).toString();
         Glide.with(this.context)
                 .load(url)
-                .optionalCenterCrop()
                 .placeholder(R.drawable.ic_noun_cat_search_232263)
+                .error(R.drawable.ic_noun_cat_search_232263)
+                .centerCrop()
+                .fitCenter()
                 .into(holder.getImageView());
 
     }
