@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -57,15 +60,26 @@ public class MainActivity extends AppCompatActivity {
         currentLanguage = preferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
         setLocale(currentLanguage);
 
+        ActionBar actionBar = getSupportActionBar();
+        ColorDrawable colorDrawable;
 
         currentTheme = preferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference language_key
         switch (currentTheme){
-            case "Light": AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); break;
-            case "Dark": AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES); break;
+            case "Light":{
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+                break;
+            }
+            case "Dark": {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                colorDrawable = new ColorDrawable(Color.parseColor("#0F9D58"));
+                actionBar.setBackgroundDrawable(colorDrawable);
+                break;
+            }
         }
 
-
         setContentView(R.layout.activity_main);
+
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -158,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent takePictureIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
         try {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         } catch (ActivityNotFoundException e) {
@@ -166,4 +180,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Can't use camera", Toast.LENGTH_SHORT).show();
         }
     }
+
+
 }

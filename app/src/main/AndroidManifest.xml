@@ -7,6 +7,8 @@
         tools:remove="android:maxSdkVersion"/>
     <uses-feature android:name="android.hardware.camera"
         android:required="true" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
 
     <application
 
@@ -16,6 +18,7 @@
         android:roundIcon="@mipmap/game_lauchericon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GalleryProject">
+
         <activity
             android:name=".EditPic"
             android:label="@string/title_activity_edit_pic"
@@ -33,6 +36,12 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
+<!--                <category android:name="android.intent.category.DEFAULT"/>-->
+<!--                <data android:mimeType=""-->
+<!--            </intent-filter>-->
         </activity>
     </application>
 

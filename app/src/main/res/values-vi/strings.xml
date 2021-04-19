@@ -27,7 +27,7 @@
             Giao diện sáng
         </item>
         <item name = "dark_theme">
-            Giao diện sáng
+            Giao diện tối
         </item>
     </string-array>
     <string name="lock">Khoá</string>
@@ -35,7 +35,7 @@
     <string name="title_copy">Copy</string>
     <string name="title_lock">Khoá</string>
     <string name="titlle_my_album">Album của tôi</string>
-    <string name="title_people_location">Người và Địa diểm</string>
+    <string name="title_people_location">Người và Địa điểm</string>
     <string name="title_change_Language">Ngôn ngữ</string>
     <string name="title_change_Theme">Giao diện</string>
 </resources>
