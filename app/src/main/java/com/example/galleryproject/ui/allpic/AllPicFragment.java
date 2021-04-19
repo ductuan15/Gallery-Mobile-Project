@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.galleryproject.MainActivity;
 import com.example.galleryproject.R;
 import com.example.galleryproject.ThumbnailPictureAdapter;
 import com.example.galleryproject.SlideMediaActivity;
@@ -57,13 +58,10 @@ public class AllPicFragment extends Fragment implements AdapterView.OnItemClickL
         this.thumbnailPic_GridView.setHasFixedSize(true);
         this.thumbnailPic_GridView.setLayoutManager(new GridLayoutManager(getActivity(), colNum));
         this.thumbnailPic_GridView.setAdapter(this.mThumbnailPictureAdapter);
-
-
         return root;
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

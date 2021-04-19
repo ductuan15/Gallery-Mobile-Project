@@ -58,6 +58,7 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
         this.uriArrayList = uriArrayList;
         this.context = context;
         this.onItemClickListener = onItemClickListener;
+        notifyDataSetChanged();
     }
 
 

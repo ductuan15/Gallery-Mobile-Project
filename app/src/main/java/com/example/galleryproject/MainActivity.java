@@ -8,15 +8,15 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.GridView;
-import android.widget.ListAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,16 +31,17 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.galleryproject.data.Album;
+import com.example.galleryproject.data.Media;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int read_external_storage_resquest_code = 1;
+    private final int REQUEST_READ_EXTERNAL_STORAGE_CODE = 1;
     static final int REQUEST_IMAGE_CAPTURE = 2;
     String currentLanguage ="en";       //value
     String currentTheme = "Light";
@@ -48,7 +49,12 @@ public class MainActivity extends AppCompatActivity {
     String currentLang;                 //key intent
     SharedPreferences preferences;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+
+    public ArrayList<Uri> mediaUriArrayList = new ArrayList<>();
+    public ArrayList<Album> albumArrayList = new ArrayList<>();
+
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,16 +86,25 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
+        //request for all permission
+        askingForPermission();
 
+        // get all data need to run app
+        getAllDataSet();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void askingForPermission() {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
             if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
                 new AlertDialog.Builder(this)
                         .setTitle("Permission needed")
                         .setMessage("This permission must have to run app")
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},read_external_storage_resquest_code);
+                                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -99,17 +114,16 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }).create().show();
             } else{
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},read_external_storage_resquest_code);
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
             }
         }
-
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case read_external_storage_resquest_code:
+            case REQUEST_READ_EXTERNAL_STORAGE_CODE:
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
@@ -158,12 +172,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent takePictureIntent = new Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA);
         try {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         } catch (ActivityNotFoundException e) {
             // display error state to the user
             Toast.makeText(MainActivity.this, "Can't use camera", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void getAllDataSet(){
+        Media.getAllMedia(this,mediaUriArrayList,albumArrayList);
+        Log.e("", "getAllDataSet: ");
     }
 }
