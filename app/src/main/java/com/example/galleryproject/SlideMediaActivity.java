@@ -13,8 +13,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.example.galleryproject.data.ImageInfo;
@@ -30,6 +34,7 @@ public class SlideMediaActivity extends AppCompatActivity {
     ViewPager2 viewPager;
     ArrayList<Uri> uriArrayList;
     private FragmentStateAdapter pagerAdapter;
+    ImageButton shareBtn;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +51,24 @@ public class SlideMediaActivity extends AppCompatActivity {
         pagerAdapter = new SlideMediaAdapter(this);
         this.viewPager.setAdapter(pagerAdapter);
         this.viewPager.setCurrentItem(bundle.getInt("imgPos"));
+
+        shareBtn = findViewById(R.id.share_button);
+        shareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Uri uriToImage = this.slideMediaActivity.uriArrayList.get(position);
+                    Intent shareIntent = new Intent();
+                    shareIntent.setAction(Intent.ACTION_SEND);
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
+                    shareIntent.setType("image/jpeg");
+                    startActivity(Intent.createChooser(shareIntent, "Share to");
+                } catch (Exception e){
+                    Log.e("Error", e.getMessage());
+                }
+
+            }
+        })
     }
 
 
