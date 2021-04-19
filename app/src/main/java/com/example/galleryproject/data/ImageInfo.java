@@ -1,5 +1,7 @@
 package com.example.galleryproject.data;
 
+import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,6 +10,8 @@ import android.os.Build;
 import android.provider.MediaStore;
 
 import androidx.annotation.RequiresApi;
+import androidx.sqlite.db.SimpleSQLiteQuery;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
 import java.util.ArrayList;
 
@@ -75,7 +79,6 @@ public class ImageInfo {
                 MediaStore.MediaColumns.DATA,
                 MediaStore.MediaColumns._ID,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,
-                MediaStore.Video.Media.DURATION
         };
         String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                 + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -83,14 +86,13 @@ public class ImageInfo {
                 + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                 + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
         int column_index_data;
-        Cursor cursor = context.getApplicationContext().getContentResolver().query(
+        @SuppressLint("Recycle") Cursor cursor = context.getApplicationContext().getContentResolver().query(
                 MediaStore.Files.getContentUri("external"),
                 projection,
                 selection,
                 null, // Selection args (none).
                 MediaStore.Files.FileColumns.DATE_ADDED + " DESC" // Sort order.
         );
-
 
         column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
 
@@ -100,11 +102,9 @@ public class ImageInfo {
             String absolutePathOfImage = cursor.getString(column_index_data);
             int mediaType = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE));
             long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
-
             if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                 // get duration of video
-                String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
-                System.out.println(duration);
+                //String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
 
                 // get thumbnail video
                 Uri contentUri = ContentUris.withAppendedId(

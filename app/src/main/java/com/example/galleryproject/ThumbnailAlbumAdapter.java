@@ -1,5 +1,7 @@
 package com.example.galleryproject;
 
+import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,17 +12,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.example.galleryproject.data.Album;
+
+import java.util.ArrayList;
+
 public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder> {
 
-    private String [] albumPath;
-    private String [] albumName;
 
+    ArrayList<Album> albumArrayList;
+    Context context;
 
 
     // TODO: get all image
-    public class ThumbnailAlbumViewHolder extends RecyclerView.ViewHolder{
-        private final ImageView imageView;
-        private final TextView albumNameTextView;
+    public static class ThumbnailAlbumViewHolder extends RecyclerView.ViewHolder{
+        final ImageView imageView;
+        final TextView albumNameTextView;
         public ThumbnailAlbumViewHolder(@NonNull View itemView) {
             super(itemView);
             //TODO: Implement click listener
@@ -29,18 +36,12 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
             this.albumNameTextView = (TextView) itemView.findViewById(R.id.album_name_holder);
 
         }
-        public ImageView getImageView(){
-            return this.imageView;
-        }
-        public TextView getAlbumNameTextView(){
-            return this.albumNameTextView;
-        }
     }
 
     //TODO: get all albums
-    public  ThumbnailAlbumAdapter(String [] albumPath, String [] albumName){
-        this.albumName = albumName;
-        this.albumPath = albumPath;
+    public  ThumbnailAlbumAdapter(ArrayList<Album> albumArrayList, Context context){
+        this.context = context;
+        this.albumArrayList = albumArrayList;
     }
 
     @NonNull
@@ -54,16 +55,24 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     // TODO: get element  according to position
     @Override
     public void onBindViewHolder(@NonNull ThumbnailAlbumViewHolder holder, int position) {
+        Album album = this.albumArrayList.get(position);
         // TODO:replace the image that we need
-        holder.getImageView().setImageResource(R.drawable.ic_noun_cat_search_232263);
+        Glide.with(this.context)
+                .load(album.getUriThumbnail())
+                .placeholder(R.drawable.ic_noun_cat_search_232263)
+                .error(R.drawable.ic_noun_cat_search_232263)
+                .centerCrop()
+                .fitCenter()
+                .into(holder.imageView);
         // TODO: replace by the name of albums
-        holder.getAlbumNameTextView().setText("Album name");
+        holder.albumNameTextView.setText(album.getAlbumName());
+
     }
 
 
     //return number of items
     @Override
     public int getItemCount() {
-        return this.albumPath.length;
+        return this.albumArrayList.size();
     }
 }

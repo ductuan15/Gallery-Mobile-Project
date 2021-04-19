@@ -15,36 +15,39 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.galleryproject.MainActivity;
 import com.example.galleryproject.R;
 import com.example.galleryproject.ThumbnailAlbumAdapter;
 import com.example.galleryproject.ThumbnailPictureAdapter;
+import com.example.galleryproject.data.Album;
+
+import java.util.ArrayList;
 
 public class AllAlbumFragment extends Fragment {
 
 
-    private AllAlbumViewModel allAlbumViewModel;
 
     private RecyclerView thumbnailAlbum_GridView;
     private RecyclerView thumbnailPeopleLocation_GridView;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        allAlbumViewModel =
-                new ViewModelProvider(this).get(AllAlbumViewModel.class);
+
         View root = inflater.inflate(R.layout.fragment_allalbum, container, false);
         int colNum = 3;
         // TODO: replace by img and album name
-        String [] data1= {"1","2","","","","","","","","",""};
-        String [] data2= {"1","2","","","","","","","","",""};
-        ThumbnailAlbumAdapter thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(data1,data2);
+        ArrayList<Album> albumArrayList = ((MainActivity) getActivity()).albumArrayList;
+
+
+        ThumbnailAlbumAdapter thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(albumArrayList,this.getContext());
         this.thumbnailAlbum_GridView = root.findViewById(R.id.grid_view_thumbnail_album);
         this.thumbnailAlbum_GridView.setLayoutManager(new GridLayoutManager(getActivity(),colNum,RecyclerView.HORIZONTAL,false));
         this.thumbnailAlbum_GridView.setAdapter(thumbnailAlbumAdapter);
 
-        thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(data1,data2);
-        this.thumbnailPeopleLocation_GridView = root.findViewById(R.id.grid_view_thumbnail_people_location);
-        this.thumbnailPeopleLocation_GridView.setLayoutManager(new GridLayoutManager(getActivity(),colNum,RecyclerView.HORIZONTAL,false));
-        this.thumbnailPeopleLocation_GridView.setAdapter(thumbnailAlbumAdapter);
+//        thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(data1,data2);
+//        this.thumbnailPeopleLocation_GridView = root.findViewById(R.id.grid_view_thumbnail_people_location);
+//        this.thumbnailPeopleLocation_GridView.setLayoutManager(new GridLayoutManager(getActivity(),colNum,RecyclerView.HORIZONTAL,false));
+//        this.thumbnailPeopleLocation_GridView.setAdapter(thumbnailAlbumAdapter);
 
         return root;
     }

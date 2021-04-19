@@ -2,6 +2,7 @@ package com.example.galleryproject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -10,6 +11,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -24,7 +26,7 @@ import java.util.ArrayList;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class SlideMediaActivity extends FragmentActivity {
+public class SlideMediaActivity extends AppCompatActivity {
     ViewPager2 viewPager;
     ArrayList<Uri> uriArrayList;
     private FragmentStateAdapter pagerAdapter;
@@ -46,15 +48,8 @@ public class SlideMediaActivity extends FragmentActivity {
         this.viewPager.setCurrentItem(bundle.getInt("imgPos"));
     }
 
-    @Override   
-    protected void onResume() {
-        super.onResume();
-        Intent gettedIntent = getIntent();
-        Bundle gettedData =  gettedIntent.getExtras();
 
-        String uriString = gettedData.getString("uriImgString");
-    }
-    private class SlideMediaAdapter extends FragmentStateAdapter{
+    private static class SlideMediaAdapter extends FragmentStateAdapter{
 
         SlideMediaActivity slideMediaActivity;
         public SlideMediaAdapter(@NonNull SlideMediaActivity slideMediaActivity) {

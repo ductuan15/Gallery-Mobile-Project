@@ -1,4 +1,4 @@
-package com.example .galleryproject;
+package com.example.galleryproject;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
@@ -8,17 +8,17 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.GridView;
-import android.widget.ListAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -34,24 +34,30 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.galleryproject.data.Album;
+import com.example.galleryproject.data.Media;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int read_external_storage_resquest_code = 1;
+    private final int REQUEST_READ_EXTERNAL_STORAGE_CODE = 1;
     static final int REQUEST_IMAGE_CAPTURE = 2;
-    String currentLanguage ="en";       //value
+    String currentLanguage = "en";       //value
     String currentTheme = "Light";
     Locale myLocale;
     String currentLang;                 //key intent
     SharedPreferences preferences;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+
+    public ArrayList<Uri> mediaUriArrayList = new ArrayList<>();
+    public ArrayList<Album> albumArrayList = new ArrayList<>();
+
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
         ColorDrawable colorDrawable;
 
         currentTheme = preferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference language_key
-        switch (currentTheme){
-            case "Light":{
+        switch (currentTheme) {
+            case "Light": {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
                 break;
@@ -80,11 +86,10 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.navigation_allpic,R.id.navigation_allalbum,R.id.navigation_setting)
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.navigation_allpic, R.id.navigation_allalbum, R.id.navigation_setting)
                 .build();
         //// NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
@@ -94,16 +99,25 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
+        //request for all permission
+        askingForPermission();
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
+        // get all data need to run app
+        getAllDataSet();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void askingForPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 new AlertDialog.Builder(this)
                         .setTitle("Permission needed")
                         .setMessage("This permission must have to run app")
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},read_external_storage_resquest_code);
+                                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -112,8 +126,8 @@ public class MainActivity extends AppCompatActivity {
                                 dialog.dismiss();
                             }
                         }).create().show();
-            } else{
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},read_external_storage_resquest_code);
+            } else {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
             }
         }
 
@@ -123,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case read_external_storage_resquest_code:
+            case REQUEST_READ_EXTERNAL_STORAGE_CODE:
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
@@ -138,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.top_menu,menu);
+        inflater.inflate(R.menu.top_menu, menu);
         return true;
     }
 
@@ -162,12 +176,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void setLocale(String localeName) {                                                      //set locale of current locale
 //        if (!localeName.equals(currentLanguage)) {
-            Locale myLocale = new Locale(localeName);
-            Resources res = getResources();                                                         //get resource of app
-            DisplayMetrics dm = res.getDisplayMetrics();
-            Configuration conf = res.getConfiguration();
-            conf.locale = myLocale;
-            res.updateConfiguration(conf, dm);
+        Locale myLocale = new Locale(localeName);
+        Resources res = getResources();                                                         //get resource of app
+        DisplayMetrics dm = res.getDisplayMetrics();
+        Configuration conf = res.getConfiguration();
+        conf.locale = myLocale;
+        res.updateConfiguration(conf, dm);
     }
 
 
@@ -182,4 +196,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void getAllDataSet() {
+        Media.getAllMedia(this, mediaUriArrayList, albumArrayList);
+        Log.e("", "getAllDataSet: ");
+    }
 }
