@@ -11,9 +11,8 @@
         android:name="android.hardware.camera"
         android:required="true" />
 
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:allowBackup="true"
@@ -31,7 +30,7 @@
             android:name=".SlideMediaActivity"
             android:exported="true"
             android:label="@string/title_activity_view_picture"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+            />
         <activity
             android:name=".MainActivity"
             android:configChanges="locale"
