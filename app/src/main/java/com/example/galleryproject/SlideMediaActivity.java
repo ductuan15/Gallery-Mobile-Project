@@ -57,7 +57,7 @@ public class SlideMediaActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    Uri uriToImage = this.slideMediaActivity.uriArrayList.get(position);
+                    Uri uriToImage = uriArrayList.get(viewPager.getCurrentItem());
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND);
                     shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
