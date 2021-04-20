@@ -27,17 +27,22 @@ import java.util.ArrayList;
 public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictureAdapter.ThumbnailPictureViewHolder> {
     private ArrayList<Uri> uriArrayList;
     private Context context;
+
+
+
     // this interface will listen to click
-    private AdapterView.OnItemClickListener onItemClickListener;
+    private final AdapterView.OnItemClickListener onItemClickListener;
 
 
     // ViewHolder class
     public static class ThumbnailPictureViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ImageView imageView;
-        private AdapterView.OnItemClickListener onItemClickListener;
+        private final ImageView imageView;
+        private final AdapterView.OnItemClickListener onItemClickListener;
 
         public ThumbnailPictureViewHolder(@NonNull View itemView,AdapterView.OnItemClickListener onItemClickListener) {
             super(itemView);
+
+
             this.imageView = itemView.findViewById(R.id.thumbnail_pic_holder);
             this.imageView.setOnClickListener(this);
 
@@ -60,7 +65,9 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
         this.onItemClickListener = onItemClickListener;
         notifyDataSetChanged();
     }
-
+    public void setUriArrayList(ArrayList<Uri> uriArrayList) {
+        this.uriArrayList = uriArrayList;
+    }
 
     @NonNull
     @Override
@@ -96,5 +103,7 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
     public Uri getItem(int position) {
         return this.uriArrayList.get(position);
     }
-
+    public synchronized void notifyDataChange(){
+        this.notifyDataSetChanged();
+    }
 }

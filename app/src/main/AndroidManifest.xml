@@ -3,45 +3,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.galleryproject">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        tools:remove="android:maxSdkVersion"/>
-    <uses-feature android:name="android.hardware.camera"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:remove="android:maxSdkVersion" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
 
     <application
-
         android:allowBackup="true"
         android:icon="@mipmap/game_lauchericon"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/game_lauchericon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GalleryProject">
-
+        <activity android:name=".AlbumViewActivity"></activity>
         <activity
             android:name=".EditPic"
             android:label="@string/title_activity_edit_pic"
-            android:theme="@style/Theme.GalleryProject.Fullscreen"/>
+            android:theme="@style/Theme.GalleryProject.Fullscreen" />
         <activity
             android:name=".SlideMediaActivity"
-            android:label="@string/title_activity_view_picture"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
+            android:label="@string/title_activity_view_picture"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
             android:name=".MainActivity"
             android:configChanges="locale"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.VIEW" />-->
-<!--                <category android:name="android.intent.category.DEFAULT"/>-->
-<!--                <data android:mimeType=""-->
-<!--            </intent-filter>-->
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.VIEW" /> -->
+            <!-- <category android:name="android.intent.category.DEFAULT"/> -->
+            <!-- <data android:mimeType="" -->
+            <!-- </intent-filter> -->
         </activity>
     </application>
 

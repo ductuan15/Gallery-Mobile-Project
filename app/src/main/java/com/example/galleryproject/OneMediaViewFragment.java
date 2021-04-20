@@ -53,22 +53,4 @@ public class OneMediaViewFragment extends Fragment  {
         this.photoView.setImage(ImageSource.uri(this.uri));
         return root;
     }
-
-
-
-
-
-
-//    @Override
-//    public void onScaleChange(float scaleFactor, float focusX, float focusY) {
-//        if(!this.isZoomed){
-//            this.isZoomed = true;
-//            Glide.with(this).asBitmap()
-//                    .load(this.uri)
-//                    .error(R.drawable.ic_noun_cat_search_232263)
-//                    .into(this.photoView);
-//        }
-//        Log.e("TAG", "onScaleChange: ");
-//        return;
-//    }
 }

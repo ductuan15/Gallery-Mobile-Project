@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     Locale myLocale;
     String currentLang;                 //key intent
     SharedPreferences preferences;
+    boolean gettedData = false;
 
 
     public ArrayList<Uri> mediaUriArrayList = new ArrayList<>();
@@ -105,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         // get all data need to run app
         getAllDataSet();
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void askingForPermission() {
@@ -198,6 +200,10 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private void getAllDataSet() {
+        if(gettedData){
+            return;
+        }
+        gettedData = true;
         Media.getAllMedia(this, mediaUriArrayList, albumArrayList);
         Log.e("", "getAllDataSet: ");
     }

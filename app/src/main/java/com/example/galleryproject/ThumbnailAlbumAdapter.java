@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,26 +23,31 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
 
     ArrayList<Album> albumArrayList;
     Context context;
+    // this interface will listen to click
+    private final View.OnClickListener onItemClickListener;
 
 
     // TODO: get all image
-    public static class ThumbnailAlbumViewHolder extends RecyclerView.ViewHolder{
+    public static class ThumbnailAlbumViewHolder extends RecyclerView.ViewHolder {
         final ImageView imageView;
         final TextView albumNameTextView;
-        public ThumbnailAlbumViewHolder(@NonNull View itemView) {
+        public ThumbnailAlbumViewHolder(@NonNull View itemView,View.OnClickListener onItemClickListener) {
             super(itemView);
-            //TODO: Implement click listener
+            // set tag as itemview to get itemview when click
+            itemView.setTag(this);
+            // set onclick Fragment/Activity
+            itemView.setOnClickListener(onItemClickListener);
             this.imageView = (ImageView) itemView.findViewById(R.id.thumbnail_album_holder);
-
             this.albumNameTextView = (TextView) itemView.findViewById(R.id.album_name_holder);
-
         }
+
     }
 
     //TODO: get all albums
-    public  ThumbnailAlbumAdapter(ArrayList<Album> albumArrayList, Context context){
+    public  ThumbnailAlbumAdapter(ArrayList<Album> albumArrayList, View.OnClickListener onItemClickListener, Context context){
         this.context = context;
         this.albumArrayList = albumArrayList;
+        this.onItemClickListener = onItemClickListener;
     }
 
     @NonNull
@@ -49,7 +55,7 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     public ThumbnailAlbumViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_album,parent,false);
 
-        return new ThumbnailAlbumViewHolder(view);
+        return new ThumbnailAlbumViewHolder(view,this.onItemClickListener);
     }
 
     // TODO: get element  according to position
@@ -66,7 +72,6 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
                 .into(holder.imageView);
         // TODO: replace by the name of albums
         holder.albumNameTextView.setText(album.getAlbumName());
-
     }
 
 
@@ -74,5 +79,8 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     @Override
     public int getItemCount() {
         return this.albumArrayList.size();
+    }
+    public synchronized void notifyDataChange(){
+        this.notifyDataSetChanged();
     }
 }

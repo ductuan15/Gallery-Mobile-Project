@@ -33,7 +33,6 @@ import java.util.ArrayList;
 public class SlideMediaActivity extends AppCompatActivity {
     ViewPager2 viewPager;
     ArrayList<Uri> uriArrayList;
-    private FragmentStateAdapter pagerAdapter;
     ImageButton shareBtn;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,7 +47,7 @@ public class SlideMediaActivity extends AppCompatActivity {
         bundle.getInt("imgPos");
         this.viewPager  = findViewById(R.id.media_viewpager);
         this.uriArrayList =  ImageInfo.getAllPic(this);
-        pagerAdapter = new SlideMediaAdapter(this);
+        FragmentStateAdapter pagerAdapter = new SlideMediaAdapter(this);
         this.viewPager.setAdapter(pagerAdapter);
         this.viewPager.setCurrentItem(bundle.getInt("imgPos"));
 
@@ -57,20 +56,19 @@ public class SlideMediaActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    Uri uriToImage = this.slideMediaActivity.uriArrayList.get(position);
+                    Uri uriToImage = uriArrayList.get(viewPager.getCurrentItem());
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND);
                     shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
                     shareIntent.setType("image/jpeg");
-                    startActivity(Intent.createChooser(shareIntent, "Share to");
+                    startActivity(Intent.createChooser(shareIntent, "Share to"));
                 } catch (Exception e){
                     Log.e("Error", e.getMessage());
                 }
 
             }
-        })
+        });
     }
-
 
     private static class SlideMediaAdapter extends FragmentStateAdapter{
 

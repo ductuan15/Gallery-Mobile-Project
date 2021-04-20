@@ -1,14 +1,10 @@
 package com.example.galleryproject.ui.allpic;
 
-import android.content.ContentUris;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.Cursor;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +17,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.galleryproject.MainActivity;
 import com.example.galleryproject.R;
 import com.example.galleryproject.ThumbnailPictureAdapter;
 import com.example.galleryproject.SlideMediaActivity;
@@ -33,7 +28,7 @@ public class AllPicFragment extends Fragment implements AdapterView.OnItemClickL
 
     private AllPicViewModel allPicViewModel;
     private RecyclerView thumbnailPic_GridView;
-    private ThumbnailPictureAdapter mThumbnailPictureAdapter;
+    private ThumbnailPictureAdapter thumbnailPictureAdapter;
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -52,16 +47,20 @@ public class AllPicFragment extends Fragment implements AdapterView.OnItemClickL
 
 
         // set this fragment as a listener
-        ThumbnailPictureAdapter thumbnailPictureAdapter = new ThumbnailPictureAdapter(uriArrayList, this.getContext(),this);
-        this.mThumbnailPictureAdapter = thumbnailPictureAdapter;
+        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(uriArrayList, this.getContext(),this);
         this.thumbnailPic_GridView = root.findViewById(R.id.grid_view_thumbnail_pic);
         this.thumbnailPic_GridView.setHasFixedSize(true);
         this.thumbnailPic_GridView.setLayoutManager(new GridLayoutManager(getActivity(), colNum));
-        this.thumbnailPic_GridView.setAdapter(this.mThumbnailPictureAdapter);
+        this.thumbnailPic_GridView.setAdapter(this.thumbnailPictureAdapter);
         return root;
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        this.thumbnailPictureAdapter.notifyDataChange();
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
