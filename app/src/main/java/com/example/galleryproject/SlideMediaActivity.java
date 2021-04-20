@@ -62,13 +62,13 @@ public class SlideMediaActivity extends AppCompatActivity {
                     shareIntent.setAction(Intent.ACTION_SEND);
                     shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
                     shareIntent.setType("image/jpeg");
-                    startActivity(Intent.createChooser(shareIntent, "Share to");
+                    startActivity(Intent.createChooser(shareIntent, "Share to"));
                 } catch (Exception e){
                     Log.e("Error", e.getMessage());
                 }
 
             }
-        })
+        });
     }
 
 

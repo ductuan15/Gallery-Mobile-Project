@@ -66,10 +66,10 @@ public class MainActivity extends AppCompatActivity {
         currentLanguage = preferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
         setLocale(currentLanguage);
 
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getSupportActionBar();                                                            //change color for actionbar
         ColorDrawable colorDrawable;
 
-        currentTheme = preferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference language_key
+        currentTheme = preferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference theme
         switch (currentTheme) {
             case "Light": {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
