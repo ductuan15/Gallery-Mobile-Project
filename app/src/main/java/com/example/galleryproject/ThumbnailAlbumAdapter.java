@@ -80,7 +80,7 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     public int getItemCount() {
         return this.albumArrayList.size();
     }
-    public synchronized void notifyDataChange(){
+    public void notifyDataChange(){
         this.notifyDataSetChanged();
     }
 }

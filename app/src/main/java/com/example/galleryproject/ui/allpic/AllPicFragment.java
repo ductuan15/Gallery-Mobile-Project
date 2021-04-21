@@ -2,7 +2,6 @@ package com.example.galleryproject.ui.allpic;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,12 +16,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.galleryproject.MainActivity;
 import com.example.galleryproject.R;
 import com.example.galleryproject.ThumbnailPictureAdapter;
 import com.example.galleryproject.SlideMediaActivity;
-import com.example.galleryproject.data.ImageInfo;
-
-import java.util.ArrayList;
 
 public class AllPicFragment extends Fragment implements AdapterView.OnItemClickListener {
 
@@ -43,11 +40,10 @@ public class AllPicFragment extends Fragment implements AdapterView.OnItemClickL
         }
 
 
-        ArrayList<Uri> uriArrayList = ImageInfo.getAllPic(this.getActivity());
 
 
         // set this fragment as a listener
-        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(uriArrayList, this.getContext(),this);
+        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(((MainActivity)getActivity()).mediaArrayList, this.getContext(),this);
         this.thumbnailPic_GridView = root.findViewById(R.id.grid_view_thumbnail_pic);
         this.thumbnailPic_GridView.setHasFixedSize(true);
         this.thumbnailPic_GridView.setLayoutManager(new GridLayoutManager(getActivity(), colNum));
@@ -59,7 +55,14 @@ public class AllPicFragment extends Fragment implements AdapterView.OnItemClickL
     @Override
     public void onResume() {
         super.onResume();
-        this.thumbnailPictureAdapter.notifyDataChange();
+        thumbnailPictureAdapter.setMediaArrayList(((MainActivity)getActivity()).mediaArrayList);
+//        Runnable runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                thumbnailPictureAdapter.setUriArrayList(((MainActivity)getActivity()).mediaUriArrayList);
+//            }
+//        };
+//        new Thread(runnable).start();
     }
 
     @Override

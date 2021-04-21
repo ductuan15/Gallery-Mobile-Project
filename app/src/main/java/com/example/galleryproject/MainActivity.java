@@ -2,13 +2,11 @@ package com.example.galleryproject;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -54,9 +52,8 @@ public class MainActivity extends AppCompatActivity {
     boolean gettedData = false;
 
 
-    public ArrayList<Uri> mediaUriArrayList = new ArrayList<>();
+    public ArrayList<Media> mediaArrayList = new ArrayList<>();
     public ArrayList<Album> albumArrayList = new ArrayList<>();
-
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
@@ -103,10 +100,28 @@ public class MainActivity extends AppCompatActivity {
         //request for all permission
         askingForPermission();
 
-        // get all data need to run app
-        getAllDataSet();
+
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // get all data need to run app
+        getAllDataSet();
+//        Runnable runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                getAllDataSet();
+//                try {
+//                    Thread.sleep(10000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        };
+//        new Thread(runnable).start();
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void askingForPermission() {
@@ -115,19 +130,8 @@ public class MainActivity extends AppCompatActivity {
                 new AlertDialog.Builder(this)
                         .setTitle("Permission needed")
                         .setMessage("This permission must have to run app")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).create().show();
+                        .setPositiveButton("OK", (dialog, which) -> requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE))
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create().show();
             } else {
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
             }
@@ -198,13 +202,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
+    @RequiresApi(api = Build.VERSION_CODES.R)
     private void getAllDataSet() {
-        if(gettedData){
-            return;
-        }
-        gettedData = true;
-        Media.getAllMedia(this, mediaUriArrayList, albumArrayList);
+        this.mediaArrayList.clear();
+        this.albumArrayList.clear();
+        Media.getAllMediaUri(this, this.mediaArrayList,this.albumArrayList);
         Log.e("", "getAllDataSet: ");
     }
 }

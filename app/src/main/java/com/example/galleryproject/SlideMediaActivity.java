@@ -4,39 +4,27 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.Manifest;
 import android.content.ContentResolver;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.galleryproject.data.ImageInfo;
+import com.example.galleryproject.data.Media;
 
 
 import java.util.ArrayList;
@@ -47,11 +35,11 @@ import java.util.ArrayList;
  */
 public class SlideMediaActivity extends AppCompatActivity {
     ViewPager2 viewPager;
-    ArrayList<Uri> uriArrayList;
+    ArrayList<Media> mediaArrayList = new ArrayList<>();
     ImageButton shareBtn, deleteBtn;
 
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +52,11 @@ public class SlideMediaActivity extends AppCompatActivity {
         Bundle bundle = intent.getExtras();
         bundle.getInt("imgPos");
         this.viewPager  = findViewById(R.id.media_viewpager);
-        this.uriArrayList =  ImageInfo.getAllPic(this);
+
+        // get all media
+        Media.getAllMediaUri(this,mediaArrayList,null);
+
+        // set ip adapter
         FragmentStateAdapter pagerAdapter = new SlideMediaAdapter(this);
         this.viewPager.setAdapter(pagerAdapter);
         this.viewPager.setCurrentItem(bundle.getInt("imgPos"));
@@ -84,7 +76,7 @@ public class SlideMediaActivity extends AppCompatActivity {
         shareBtn = findViewById(R.id.share_button);
         shareBtn.setOnClickListener(v -> {
             try {
-                Uri uriToImage = uriArrayList.get(viewPager.getCurrentItem());
+                Uri uriToImage = mediaArrayList.get(viewPager.getCurrentItem()).getUri();
                 Intent shareIntent = new Intent();
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
@@ -100,7 +92,7 @@ public class SlideMediaActivity extends AppCompatActivity {
         deleteBtn.setOnClickListener(v -> {
             try {
                 ContentResolver resolver = getApplicationContext().getContentResolver();            // Remove a specific media item.
-                Uri imageUri = uriArrayList.get(viewPager.getCurrentItem());                        // URI of the image to remove.
+                Uri imageUri = mediaArrayList.get(viewPager.getCurrentItem()).getUri();                        // URI of the image to remove.
                 // Perform the actual removal.
                 int numImagesRemoved = resolver.delete(
                         imageUri,
@@ -111,11 +103,14 @@ public class SlideMediaActivity extends AppCompatActivity {
                 }
                 else {
                     Toast.makeText(this, "Delete successfully", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
                 }
             } catch (Exception e){
                 Log.e("Error", e.getMessage());
             }
         });
+
+
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -136,14 +131,14 @@ public class SlideMediaActivity extends AppCompatActivity {
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            Uri uri = this.slideMediaActivity.uriArrayList.get(position);
+            Uri uri = this.slideMediaActivity.mediaArrayList.get(position).getUri();
 
             return new OneMediaViewFragment(uri);
         }
 
         @Override
         public int getItemCount() {
-            return this.slideMediaActivity.uriArrayList.size();
+            return this.slideMediaActivity.mediaArrayList.size();
         }
     }
 

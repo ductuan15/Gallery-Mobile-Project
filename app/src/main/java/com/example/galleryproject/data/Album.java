@@ -10,13 +10,14 @@ import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 
-public class Album implements Parcelable{
-    ArrayList<Uri> mediaUriArrayList = new ArrayList<>();
+public class Album implements Parcelable {
+    ArrayList<Media> mediaArrayList = new ArrayList<>();
     String albumName;
     boolean isLock;
 
     protected Album(Parcel in) {
-        mediaUriArrayList = in.createTypedArrayList(Uri.CREATOR);
+
+        mediaArrayList = in.createTypedArrayList(Media.CREATOR);
         albumName = in.readString();
         isLock = in.readByte() != 0;
     }
@@ -33,44 +34,6 @@ public class Album implements Parcelable{
         }
     };
 
-    public void setAlbumName(String albumName) {
-        this.albumName = albumName;
-    }
-
-    public void setLock(boolean lock) {
-        this.isLock = lock;
-    }
-
-    public boolean addMedia(Uri uri){
-        try{
-            this.mediaUriArrayList.add(uri);
-        }catch (Exception e){
-            Log.e("", e.toString());
-            return false;
-        }
-        return true;
-    }
-
-
-    public Album( String albumName, boolean isLock) {
-        this.albumName = albumName;
-        this.isLock = isLock;
-    }
-
-    public ArrayList<Uri> getMediaUriArrayList() {
-        return mediaUriArrayList;
-    }
-
-    public String getAlbumName() {
-        return albumName;
-    }
-
-    public boolean isLock() {
-        return isLock;
-    }
-    public Uri getUriThumbnail(){
-        return this.mediaUriArrayList.get(0);
-    }
 
     @Override
     public int describeContents() {
@@ -80,8 +43,62 @@ public class Album implements Parcelable{
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeTypedList(this.mediaUriArrayList);
+        dest.writeTypedList(this.mediaArrayList);
         dest.writeString(this.albumName);
         dest.writeBoolean(this.isLock);
     }
+
+    public void setAlbumName(String albumName) {
+        this.albumName = albumName;
+    }
+
+    public void setLock(boolean lock) {
+        this.isLock = lock;
+    }
+
+    public void addMedia(Media media) {
+        try {
+            this.mediaArrayList.add(media);
+        } catch (Exception e) {
+            Log.e("", e.toString());
+        }
+    }
+
+    public void addImageInfo(ImageInfo media) {
+        try {
+            this.mediaArrayList.add(media);
+        } catch (Exception e) {
+            Log.e("", e.toString());
+        }
+    }
+
+    public void addVideoInfo(VideoInfo media) {
+        try {
+            this.mediaArrayList.add(media);
+        } catch (Exception e) {
+            Log.e("", e.toString());
+        }
+    }
+
+    public Album(String albumName, boolean isLock) {
+        this.albumName = albumName;
+        this.isLock = isLock;
+    }
+
+    public ArrayList<Media> getMediaArrayList() {
+        return mediaArrayList;
+    }
+
+    public String getAlbumName() {
+        return albumName;
+    }
+
+    public boolean isLock() {
+        return isLock;
+    }
+
+    public Uri getUriThumbnail() {
+        return this.mediaArrayList.get(0).getUri();
+    }
+
 }

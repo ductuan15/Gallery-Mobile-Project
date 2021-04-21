@@ -5,18 +5,18 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 
 import com.example.galleryproject.data.Album;
+import com.example.galleryproject.data.Media;
 
 import java.util.ArrayList;
 
 public class AlbumViewActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
     ArrayList<Album> albumArrayList = new ArrayList<>();
-    ArrayList<Uri> mediaUriArrayList = new ArrayList<>();
+    ArrayList<Media> mediaArrayList = new ArrayList<>();
     RecyclerView listViewAllAlbum;
     RecyclerView gridViewAllMedia;
     ThumbnailPictureAdapter thumbnailPictureAdapter;
@@ -48,10 +48,10 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
 
 
         // get all media of album
-        this.mediaUriArrayList = this.albumArrayList.get(this.albumSelectedPos).getMediaUriArrayList();
+        this.mediaArrayList = this.albumArrayList.get(this.albumSelectedPos).getMediaArrayList();
 
         //set up  recycleView
-        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaUriArrayList, this, this);
+        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaArrayList, this, this);
         this.gridViewAllMedia = findViewById(R.id.grid_view_thumbnail_media);
         this.gridViewAllMedia.setAdapter(thumbnailPictureAdapter);
         this.gridViewAllMedia.setLayoutManager(new GridLayoutManager(this, 3));
@@ -62,9 +62,10 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
         ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder viewHolder = (ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder) v.getTag();
         int pos = viewHolder.getAdapterPosition();
         if (pos != this.albumSelectedPos) {
-            this.mediaUriArrayList = this.albumArrayList.get(pos).getMediaUriArrayList();
-            this.thumbnailPictureAdapter.setUriArrayList(this.mediaUriArrayList);
+            this.mediaArrayList = this.albumArrayList.get(pos).getMediaArrayList();
+            this.thumbnailPictureAdapter.setMediaArrayList(this.mediaArrayList);
             this.thumbnailPictureAdapter.notifyDataChange();
+            this.albumSelectedPos = pos;
         }
     }
 
