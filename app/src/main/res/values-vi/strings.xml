@@ -10,7 +10,7 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="title_activity_edit_pic">FullscreenActivity</string>
     <string name="title_detail">Chi tiết</string>
-    <string name="title_set_as_wallpaper">Đặt làm hình nền</string>
+    <string name="title_set_as_wallpaper">Đặt làm ...</string>
     <string name="title_location_tag">Thêm địa diểm</string>
     <string name="title_set_default_app">Đặt làm ứng dụng mặc định</string>
     <string-array name="Languages">

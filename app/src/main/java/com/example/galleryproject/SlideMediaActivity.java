@@ -14,7 +14,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.Manifest;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,10 +23,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -39,6 +38,7 @@ import android.widget.Toast;
 import com.example.galleryproject.data.ImageInfo;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -122,6 +122,43 @@ public class SlideMediaActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.viewpicture_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.add_location_tag_opt:
+
+                return true;
+            case R.id.lock_picture:
+
+                return true;
+            case R.id.detail_button:
+
+                return true;
+            case R.id.setWallpaper_button:
+                setImageAsWallpaper();
+                return true;
+            case R.id.copy_button:
+
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void setImageAsWallpaper() {
+//        final WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
+//        // set the wallpaper by calling the setResource function and
+//        // passing the drawable file
+//        wallpaperManager.getCropAndSetWallpaperIntent(uriArrayList.get(viewPager.getCurrentItem()));
+        Intent intent = new Intent(Intent.ACTION_ATTACH_DATA);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setDataAndType(uriArrayList.get(viewPager.getCurrentItem()), "image/jpeg");
+        intent.putExtra("mimeType", "image/jpeg");
+        this.startActivity(Intent.createChooser(intent, "Set as:"));
     }
 
     private static class SlideMediaAdapter extends FragmentStateAdapter{

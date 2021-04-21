@@ -10,7 +10,7 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="title_activity_edit_pic">FullscreenActivity</string>
     <string name="title_detail">Detail</string>
-    <string name="title_set_as_wallpaper">Set as wallpaper</string>
+    <string name="title_set_as_wallpaper">Set as ...</string>
     <string name="title_location_tag">Add location tag for image</string>
     <string name="title_set_default_app">Set as default app</string>
     <string name="title_change_Language">Language</string>
