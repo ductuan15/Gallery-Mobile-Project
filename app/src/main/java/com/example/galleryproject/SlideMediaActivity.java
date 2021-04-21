@@ -4,15 +4,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.Manifest;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -28,6 +34,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.galleryproject.data.ImageInfo;
 
@@ -43,6 +50,8 @@ public class SlideMediaActivity extends AppCompatActivity {
     ArrayList<Uri> uriArrayList;
     ImageButton shareBtn, deleteBtn;
 
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,18 +101,17 @@ public class SlideMediaActivity extends AppCompatActivity {
             try {
                 ContentResolver resolver = getApplicationContext().getContentResolver();            // Remove a specific media item.
                 Uri imageUri = uriArrayList.get(viewPager.getCurrentItem());                        // URI of the image to remove.
-                String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-                        + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-                        + " AND "
-                        + MediaStore.Images.Media.EXTERNAL_CONTENT_URI + "="
-                        + imageUri.toString();
-                //String[] selectionArgs = new String[] {imageUri};
-
                 // Perform the actual removal.
                 int numImagesRemoved = resolver.delete(
                         imageUri,
-                        selection,
+                        null,
                         null);
+                if(numImagesRemoved == 0){
+                    Toast.makeText(this, "Delete unsuccessfully", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(this, "Delete successfully", Toast.LENGTH_SHORT).show();
+                }
             } catch (Exception e){
                 Log.e("Error", e.getMessage());
             }
