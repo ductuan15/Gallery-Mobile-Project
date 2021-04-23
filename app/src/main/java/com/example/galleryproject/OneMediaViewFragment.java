@@ -19,11 +19,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
-import com.github.chrisbanes.photoview.OnMatrixChangedListener;
-import com.github.chrisbanes.photoview.OnScaleChangedListener;
-import com.github.chrisbanes.photoview.PhotoView;
 
-import java.util.zip.Inflater;
 
 public class OneMediaViewFragment extends Fragment  {
     Uri uri;

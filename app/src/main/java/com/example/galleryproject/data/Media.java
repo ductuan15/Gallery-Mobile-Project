@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
@@ -15,14 +14,17 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+import androidx.exifinterface.media.ExifInterface;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 
-public class Media  implements Parcelable{
+public class Media implements Parcelable {
 
 
     final Uri uri;
@@ -49,10 +51,9 @@ public class Media  implements Parcelable{
         public Media createFromParcel(Parcel in) {
 
             int type = in.readInt();
-            if(type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE){
+            if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                 return new ImageInfo(in);
-            }
-            else{
+            } else {
                 return new VideoInfo(in);
             }
         }
@@ -219,7 +220,9 @@ public class Media  implements Parcelable{
                 MediaStore.MediaColumns._ID,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,
                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-                MediaStore.MediaColumns.DURATION,
+                MediaStore.MediaColumns.DURATION
+//                MediaStore.Images.ImageColumns.LATITUDE,
+//                MediaStore.Images.ImageColumns.LONGITUDE
         };
         String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                 + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -236,6 +239,32 @@ public class Media  implements Parcelable{
         );
 
         while (cursor.moveToNext()) {
+
+            //TODO: delete this block test
+//            double[] coordinate;
+//            String location = null;
+//            String absolutePathOfImage = "/storage/self/primary/DCIM/Camera/20210423_000549.jpg";
+//
+//            // get location of media
+//            try {
+//                ExifInterface exifInterface = new ExifInterface(absolutePathOfImage);
+//                String lat = ExifInterface.TAG_GPS_LATITUDE;
+//                String lon = ExifInterface.TAG_GPS_LONGITUDE;
+//                lat = exifInterface.getAttribute(lat);
+//                lon = exifInterface.getAttribute(lon);
+//                coordinate = exifInterface.getLatLong();
+//                if(coordinate!=null){
+//                    Log.e("TAG", "getAllMediaUri: ");
+//                }
+////
+//                location = getAddress(coordinate[0], coordinate[1], context);
+//                if(location!=null){
+//                    Log.e("", "OH YEAH" );
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
 
             // media type
             int mediaType = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE));
@@ -257,7 +286,7 @@ public class Media  implements Parcelable{
 
                 nextMedia = new VideoInfo(contentUri, null, null, null, mediaType, null, null, duration);
                 mediaArrayList.add(nextMedia);
-                addVideoToAlbumList(bucketName,albumArrayList,(VideoInfo) nextMedia);
+                addVideoToAlbumList(bucketName, albumArrayList, (VideoInfo) nextMedia);
 
             } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                 // get thumbnail img
@@ -265,9 +294,19 @@ public class Media  implements Parcelable{
                 contentUri = ContentUris.withAppendedId(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
 
+//                Uri geoUri = MediaStore.setRequireOriginal(contentUri);
+//                String location;
+//                double[] coordinate = new double[2];
+//                coordinate[0] = cursor.getDouble(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.LATITUDE));
+//                coordinate[1] = cursor.getDouble(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.LONGITUDE));
+//
+//                Log.e("TAG", "getAllMediaUri: ");
+//                location = getAddress(coordinate[0], coordinate[1], context);
+
+
                 nextMedia = new ImageInfo(contentUri, null, null, null, mediaType, null, null);
                 mediaArrayList.add(nextMedia);
-                addImageToAlbumList(bucketName,albumArrayList,(ImageInfo) nextMedia);
+                addImageToAlbumList(bucketName, albumArrayList, (ImageInfo) nextMedia);
             }
 
 
@@ -299,7 +338,7 @@ public class Media  implements Parcelable{
         return null;
     }
 
-    private static void addImageToAlbumList(String bucketName, ArrayList<Album> albumArrayList, ImageInfo nextMedia){
+    private static void addImageToAlbumList(String bucketName, ArrayList<Album> albumArrayList, ImageInfo nextMedia) {
 
         // check if bucket name is existed
         if (albumArrayList == null) {
@@ -317,7 +356,7 @@ public class Media  implements Parcelable{
         albumArrayList.get(pos).addImageInfo(nextMedia);
     }
 
-    private static void addVideoToAlbumList(String bucketName, ArrayList<Album> albumArrayList, VideoInfo nextMedia){
+    private static void addVideoToAlbumList(String bucketName, ArrayList<Album> albumArrayList, VideoInfo nextMedia) {
 
         // check if bucket name is existed
         if (albumArrayList == null) {
@@ -334,7 +373,6 @@ public class Media  implements Parcelable{
 
         albumArrayList.get(pos).addVideoInfo(nextMedia);
     }
-
 
 
 }

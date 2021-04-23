@@ -54,6 +54,4 @@ public class SettingFragment extends PreferenceFragmentCompat {
             }
         });
     }
-
-
 }

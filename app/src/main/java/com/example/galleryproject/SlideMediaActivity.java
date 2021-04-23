@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -111,6 +112,43 @@ public class SlideMediaActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.add_location_tag_opt:
+
+                return true;
+            case R.id.lock_picture:
+
+                return true;
+            case R.id.detail_button:
+
+                return true;
+            case R.id.setWallpaper_button:
+                setImageAsWallpaper();
+                return true;
+            case R.id.copy_button:
+
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void setImageAsWallpaper() {
+//        final WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
+//        // set the wallpaper by calling the setResource function and
+//        // passing the drawable file
+//        wallpaperManager.getCropAndSetWallpaperIntent(uriArrayList.get(viewPager.getCurrentItem()));
+        Intent intent = new Intent(Intent.ACTION_ATTACH_DATA);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setDataAndType(mediaArrayList.get(viewPager.getCurrentItem()).getUri(), "image/jpeg");
+        intent.putExtra("mimeType", "image/jpeg");
+        this.startActivity(Intent.createChooser(intent, "Set as:"));
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
