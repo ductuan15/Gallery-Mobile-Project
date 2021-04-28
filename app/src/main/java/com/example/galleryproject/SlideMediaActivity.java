@@ -41,7 +41,7 @@ import java.util.ArrayList;
 public class SlideMediaActivity extends AppCompatActivity implements View.OnClickListener {
     ViewPager2 viewPager;
     ArrayList<Media> mediaArrayList = new ArrayList<>();
-    ImageButton shareBtn, deleteBtn;
+    ImageButton shareBtn, deleteBtn, editBtn;
     LinearLayout buttonLayout;
     ActionBar actionBar;
     boolean isNavigateVisible = true;
@@ -117,7 +117,15 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
             }
         });
 
-
+        editBtn = findViewById(R.id.edit_button);
+        editBtn.setOnClickListener(v -> {                                                           // give intent to edit image
+            Intent editIntent = new Intent(this, EditPic.class);
+            Bundle data = new Bundle();
+            Uri imageUri = mediaArrayList.get(viewPager.getCurrentItem()).getUri();                        // URI of the image to remove.
+            data.putParcelable("imageUri", imageUri);
+            intent.putExtras(data);
+            startActivity(intent);
+        });
     }
 
 //    @Override

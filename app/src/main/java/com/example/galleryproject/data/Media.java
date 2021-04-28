@@ -212,7 +212,7 @@ public class Media implements Parcelable {
             }
             int pos = findAlbumPos(albumArrayList, bucketName);
             if (pos == -1) {
-                albumArrayList.add(new Album(bucketName));
+                albumArrayList.add(new Album(bucketName, false));
                 pos = albumArrayList.size() - 1;
             }
             if (albumArrayList != null)
@@ -369,7 +369,7 @@ public class Media implements Parcelable {
         }
         int pos = findAlbumPos(albumArrayList, bucketName);
         if (pos == -1) {
-            albumArrayList.add(new Album(bucketName));
+            albumArrayList.add(new Album(bucketName, false));
             pos = albumArrayList.size() - 1;
         }
 
@@ -387,7 +387,7 @@ public class Media implements Parcelable {
         }
         int pos = findAlbumPos(albumArrayList, bucketName);
         if (pos == -1) {
-            albumArrayList.add(new Album(bucketName));
+            albumArrayList.add(new Album(bucketName, false));
             pos = albumArrayList.size() - 1;
         }
 
