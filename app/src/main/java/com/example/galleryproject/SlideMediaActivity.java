@@ -123,8 +123,8 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
             Bundle data = new Bundle();
             Uri imageUri = mediaArrayList.get(viewPager.getCurrentItem()).getUri();                        // URI of the image to remove.
             data.putParcelable("imageUri", imageUri);
-            intent.putExtras(data);
-            startActivity(intent);
+            editIntent.putExtras(data);
+            startActivity(editIntent);
         });
     }
 
