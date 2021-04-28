@@ -15,7 +15,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
-import androidx.room.Entity;
+
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
