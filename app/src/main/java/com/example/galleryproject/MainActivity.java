@@ -38,7 +38,6 @@ import com.example.galleryproject.data.Album;
 import com.example.galleryproject.data.Media;
 import com.example.galleryproject.ui.allpic.AllPicFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.play.core.splitinstall.f;
 
 import java.util.ArrayList;
 import java.util.List;

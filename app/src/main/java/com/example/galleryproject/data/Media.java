@@ -13,13 +13,11 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
-import androidx.room.Entity;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +31,7 @@ public class Media implements Parcelable {
     final String fileName;
     final String location;
     final int orientation;
+    boolean isInLockedAlbum = false;
 
     protected Media(Parcel in) {
         uri = in.readParcelable(Uri.class.getClassLoader());
@@ -213,7 +212,7 @@ public class Media implements Parcelable {
             }
             int pos = findAlbumPos(albumArrayList, bucketName);
             if (pos == -1) {
-                albumArrayList.add(new Album(bucketName, false));
+                albumArrayList.add(new Album(bucketName));
                 pos = albumArrayList.size() - 1;
             }
             if (albumArrayList != null)
@@ -370,7 +369,7 @@ public class Media implements Parcelable {
         }
         int pos = findAlbumPos(albumArrayList, bucketName);
         if (pos == -1) {
-            albumArrayList.add(new Album(bucketName, false));
+            albumArrayList.add(new Album(bucketName));
             pos = albumArrayList.size() - 1;
         }
 
@@ -388,10 +387,30 @@ public class Media implements Parcelable {
         }
         int pos = findAlbumPos(albumArrayList, bucketName);
         if (pos == -1) {
-            albumArrayList.add(new Album(bucketName, false));
+            albumArrayList.add(new Album(bucketName));
             pos = albumArrayList.size() - 1;
         }
 
         albumArrayList.get(pos).addVideoInfo(nextMedia);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return this.uri.toString() +
+                "|" +
+                this.size +
+                "|" +
+                this.date +
+                "|" +
+                this.resolution +
+                "|" +
+                this.getMEDIA_TYPE() +
+                "|" +
+                this.fileName +
+                "|" +
+                this.location +
+                "|" +
+                this.orientation;
     }
 }

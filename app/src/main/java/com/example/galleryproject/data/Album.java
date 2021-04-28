@@ -15,12 +15,10 @@ import java.util.ArrayList;
 public class Album implements Parcelable{
     ArrayList<Media> mediaArrayList = new ArrayList<>();
     String albumName;
-    boolean isLock;
 
     protected Album(Parcel in) {
         mediaArrayList = in.createTypedArrayList(Media.CREATOR);
         albumName = in.readString();
-        isLock = in.readByte() != 0;
     }
 
     public static final Creator<Album> CREATOR = new Creator<Album>() {
@@ -46,16 +44,12 @@ public class Album implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(this.mediaArrayList);
         dest.writeString(this.albumName);
-        dest.writeBoolean(this.isLock);
     }
 
     public void setAlbumName(String albumName) {
         this.albumName = albumName;
     }
 
-    public void setLock(boolean lock) {
-        this.isLock = lock;
-    }
 
     public void addMedia(Media media) {
         try {
@@ -81,9 +75,8 @@ public class Album implements Parcelable{
         }
     }
 
-    public Album(String albumName, boolean isLock) {
+    public Album(String albumName) {
         this.albumName = albumName;
-        this.isLock = isLock;
     }
 
     public ArrayList<Media> getMediaArrayList() {
@@ -94,9 +87,6 @@ public class Album implements Parcelable{
         return albumName;
     }
 
-    public boolean isLock() {
-        return isLock;
-    }
 
     public Uri getUriThumbnail() {
         return this.mediaArrayList.get(0).getUri();
