@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -35,9 +36,12 @@ import androidx.preference.PreferenceManager;
 
 import com.example.galleryproject.data.Album;
 import com.example.galleryproject.data.Media;
+import com.example.galleryproject.ui.allpic.AllPicFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.play.core.splitinstall.f;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -89,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.navigation_allpic, R.id.navigation_allalbum, R.id.navigation_setting)
                 .build();
-        //// NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        //NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
         assert navHostFragment != null;
         NavController navController = navHostFragment.getNavController();
@@ -102,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
@@ -123,6 +128,26 @@ public class MainActivity extends AppCompatActivity {
 //        new Thread(runnable).start();
     }
 
+
+    @Override
+    public void onBackPressed() {
+        Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        List<Fragment> fragmentList = null;
+        if (navHostFragment != null) {
+            fragmentList = navHostFragment.getChildFragmentManager().getFragments();
+            boolean handled;
+            for (Fragment f : fragmentList) {
+                if (f instanceof AllPicFragment) {
+                    handled = ((AllPicFragment) f).onBackPressed();
+                    if (handled) {
+                        return;
+                    }
+                }
+            }
+        }
+        super.onBackPressed();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private void askingForPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -133,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                         .setPositiveButton("OK", (dialog, which) -> requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE))
                         .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create().show();
             } else {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.ACCESS_MEDIA_LOCATION}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
             }
         }
 
@@ -208,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
     private void getAllDataSet() {
         this.mediaArrayList.clear();
         this.albumArrayList.clear();
-        Media.getAllMediaUri(this, this.mediaArrayList,this.albumArrayList);
+        Media.getAllMediaUri(this, this.mediaArrayList, this.albumArrayList);
         Log.e("", "getAllDataSet: ");
     }
 }

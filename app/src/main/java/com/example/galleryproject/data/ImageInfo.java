@@ -5,8 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class ImageInfo  extends Media implements Parcelable {
-    public ImageInfo(Uri mUri, String size, String date, String resolution, int media_type,String fileName,String location) {
-        super(mUri, size, date, resolution, media_type, fileName, location);
+    public ImageInfo(Uri mUri, String size, String date, String resolution, int media_type,String fileName,String location, int orientation) {
+        super(mUri, size, date, resolution, media_type, fileName, location, orientation);
     }
 
     protected ImageInfo(Parcel in) {

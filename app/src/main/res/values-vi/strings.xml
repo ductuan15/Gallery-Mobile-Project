@@ -38,4 +38,5 @@
     <string name="title_people_location">Người và Địa điểm</string>
     <string name="title_change_Language">Ngôn ngữ</string>
     <string name="title_change_Theme">Giao diện</string>
+    <string name="playVideoChip">Phát video</string>
 </resources>

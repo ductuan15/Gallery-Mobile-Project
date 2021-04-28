@@ -17,12 +17,16 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Size;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.galleryproject.data.Media;
@@ -34,10 +38,14 @@ import java.util.ArrayList;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class SlideMediaActivity extends AppCompatActivity {
+public class SlideMediaActivity extends AppCompatActivity implements View.OnClickListener {
     ViewPager2 viewPager;
     ArrayList<Media> mediaArrayList = new ArrayList<>();
     ImageButton shareBtn, deleteBtn;
+    LinearLayout buttonLayout;
+    ActionBar actionBar;
+    boolean isNavigateVisible = true;
+    SlideMediaAdapter slideMediaAdapter;
 
 
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -45,30 +53,29 @@ public class SlideMediaActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide_media);
-
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        this.actionBar = getSupportActionBar();
+        this.buttonLayout = findViewById(R.id.button_layout);
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         bundle.getInt("imgPos");
-        this.viewPager  = findViewById(R.id.media_viewpager);
+        this.viewPager = findViewById(R.id.media_viewpager);
 
         // get all media
-        Media.getAllMediaUri(this,mediaArrayList,null);
+        Media.getAllMediaUri(this, mediaArrayList, null);
 
         // set ip adapter
-        FragmentStateAdapter pagerAdapter = new SlideMediaAdapter(this);
+        this.slideMediaAdapter = new SlideMediaAdapter(this, this);
+        FragmentStateAdapter pagerAdapter = new SlideMediaAdapter(this, this);
         this.viewPager.setAdapter(pagerAdapter);
         this.viewPager.setCurrentItem(bundle.getInt("imgPos"));
 
-        ActionBar actionBar = getSupportActionBar();                                                            //change color for actionbar
+        //change color for actionbar
         ColorDrawable colorDrawable;
-        if(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO) {
+        if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO) {
             colorDrawable = new ColorDrawable(getResources().getColor(R.color.purple_200));
             actionBar.setBackgroundDrawable(colorDrawable);
-        }
-        else {
+        } else {
             colorDrawable = new ColorDrawable(Color.parseColor("#0F9D58"));
             actionBar.setBackgroundDrawable(colorDrawable);
         }
@@ -83,7 +90,7 @@ public class SlideMediaActivity extends AppCompatActivity {
                 shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
                 shareIntent.setType("image/jpeg");
                 startActivity(Intent.createChooser(shareIntent, "Share to"));
-            } catch (Exception e){
+            } catch (Exception e) {
                 Log.e("Error", e.getMessage());
             }
 
@@ -99,20 +106,25 @@ public class SlideMediaActivity extends AppCompatActivity {
                         imageUri,
                         null,
                         null);
-                if(numImagesRemoved == 0){
+                if (numImagesRemoved == 0) {
                     Toast.makeText(this, "Delete unsuccessfully", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     Toast.makeText(this, "Delete successfully", Toast.LENGTH_SHORT).show();
                     onBackPressed();
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 Log.e("Error", e.getMessage());
             }
         });
 
 
     }
+
+//    @Override
+//    protected void onResumeFragments() {
+//        super.onResumeFragments();
+//    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -139,6 +151,7 @@ public class SlideMediaActivity extends AppCompatActivity {
         }
     }
 
+
     private void setImageAsWallpaper() {
 //        final WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
 //        // set the wallpaper by calling the setResource function and
@@ -157,28 +170,23 @@ public class SlideMediaActivity extends AppCompatActivity {
         return true;
     }
 
-    private static class SlideMediaAdapter extends FragmentStateAdapter{
-
-        SlideMediaActivity slideMediaActivity;
-        public SlideMediaAdapter(@NonNull SlideMediaActivity slideMediaActivity) {
-            super(slideMediaActivity);
-            this.slideMediaActivity =  slideMediaActivity;
-
-        }
-
-        @NonNull
-        @Override
-        public Fragment createFragment(int position) {
-            Uri uri = this.slideMediaActivity.mediaArrayList.get(position).getUri();
-
-            return new OneMediaViewFragment(uri);
-        }
-
-        @Override
-        public int getItemCount() {
-            return this.slideMediaActivity.mediaArrayList.size();
+    @Override
+    public void onClick(View v) {
+        //hide top bar and buttons when click and show when click again
+        if (this.actionBar != null && this.buttonLayout != null) {
+            if (this.isNavigateVisible) {
+                this.actionBar.hide();
+                this.buttonLayout.setVisibility(View.GONE);
+                this.isNavigateVisible = false;
+            } else {
+                this.actionBar.show();
+                this.buttonLayout.setVisibility(View.VISIBLE);
+                this.isNavigateVisible = true;
+            }
         }
     }
+
+
 
 
 }

@@ -43,7 +43,6 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
 
     }
 
-    //TODO: get all albums
     public  ThumbnailAlbumAdapter(ArrayList<Album> albumArrayList, View.OnClickListener onItemClickListener, Context context){
         this.context = context;
         this.albumArrayList = albumArrayList;

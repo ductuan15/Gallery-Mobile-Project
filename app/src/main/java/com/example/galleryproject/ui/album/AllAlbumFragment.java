@@ -42,13 +42,12 @@ public class AllAlbumFragment extends Fragment implements View.OnClickListener {
         this.albumArrayList = ((MainActivity) requireActivity()).albumArrayList;
 
 
-        ThumbnailAlbumAdapter thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(albumArrayList,this,this.getContext());
+        ThumbnailAlbumAdapter thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(albumArrayList, this, this.getContext());
         this.thumbnailAlbum_GridView = root.findViewById(R.id.grid_view_thumbnail_album);
-        this.thumbnailAlbum_GridView.setLayoutManager(new GridLayoutManager(getActivity(),colNum,RecyclerView.HORIZONTAL,false));
+        this.thumbnailAlbum_GridView.setLayoutManager(new GridLayoutManager(getActivity(), colNum, RecyclerView.HORIZONTAL, false));
         this.thumbnailAlbum_GridView.setAdapter(thumbnailAlbumAdapter);
         return root;
     }
-
 
 
     @Override
@@ -58,12 +57,16 @@ public class AllAlbumFragment extends Fragment implements View.OnClickListener {
         //Album a = ((MainActivity) getActivity()).albumArrayList.get(pos);
         Intent intent = new Intent(this.getActivity(), AlbumViewActivity.class);
         Bundle data = new Bundle();
-        for(int i= 0;i<this.albumArrayList.size();i++){
-            data.putParcelable(Integer.toString(i),this.albumArrayList.get(i));
+        for (int i = 0; i < this.albumArrayList.size(); i++) {
+            data.putParcelable(Integer.toString(i), this.albumArrayList.get(i));
         }
-        data.putInt("albumLen",this.albumArrayList.size());
-        data.putInt("albumPos",pos);
+        data.putInt("albumLen", this.albumArrayList.size());
+        data.putInt("albumPos", pos);
         intent.putExtras(data);
         startActivity(intent);
+    }
+
+    public boolean onBackPressed() {
+        return false;
     }
 }

@@ -14,7 +14,8 @@ import com.example.galleryproject.data.Media;
 
 import java.util.ArrayList;
 
-public class AlbumViewActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
+
+public class AlbumViewActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener, View.OnLongClickListener {
     ArrayList<Album> albumArrayList = new ArrayList<>();
     ArrayList<Media> mediaArrayList = new ArrayList<>();
     RecyclerView listViewAllAlbum;
@@ -51,7 +52,7 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
         this.mediaArrayList = this.albumArrayList.get(this.albumSelectedPos).getMediaArrayList();
 
         //set up  recycleView
-        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaArrayList, this, this);
+        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaArrayList, this, this, this);
         this.gridViewAllMedia = findViewById(R.id.grid_view_thumbnail_media);
         this.gridViewAllMedia.setAdapter(thumbnailPictureAdapter);
         this.gridViewAllMedia.setLayoutManager(new GridLayoutManager(this, 3));
@@ -72,5 +73,10 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        return false;
     }
 }

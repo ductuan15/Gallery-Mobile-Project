@@ -7,16 +7,17 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+import androidx.room.Entity;
 
 import java.util.ArrayList;
 
-public class Album implements Parcelable {
+@Entity
+public class Album implements Parcelable{
     ArrayList<Media> mediaArrayList = new ArrayList<>();
     String albumName;
     boolean isLock;
 
     protected Album(Parcel in) {
-
         mediaArrayList = in.createTypedArrayList(Media.CREATOR);
         albumName = in.readString();
         isLock = in.readByte() != 0;

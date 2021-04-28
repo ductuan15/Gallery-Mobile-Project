@@ -9,8 +9,8 @@ public class VideoInfo extends Media implements Parcelable {
 
     final int duration;
 
-    public VideoInfo(Uri uri, String size, String date, String resolution, int media_type, String fileName, String location,int duration) {
-        super(uri, size, date, resolution, media_type, fileName, location);
+    public VideoInfo(Uri uri, String size, String date, String resolution, int media_type, String fileName, String location,int duration,int orientation) {
+        super(uri, size, date, resolution, media_type, fileName, location, orientation);
         this.duration = duration;
     }
 
