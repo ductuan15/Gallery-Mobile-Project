@@ -1,4 +1,4 @@
-package com.example.galleryproject;
+package com.example.galleryproject.edit;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.galleryproject.R;
 
 import java.util.ArrayList;
 import java.util.List;

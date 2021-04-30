@@ -1,34 +1,45 @@
 package com.example.galleryproject;
 
-import android.annotation.SuppressLint;
-
-import androidx.appcompat.app.ActionBar;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.ChangeBounds;
 import androidx.transition.TransitionManager;
 
+import android.Manifest;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MotionEvent;
-import android.view.View;
+import android.view.MenuItem;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.galleryproject.edit.FileSaveHelper;
+import com.example.galleryproject.edit.PropertiesBSFragment;
+import com.example.galleryproject.edit.TextEditorDialogFragment;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
+import java.io.IOException;
 
 import ja.burhanrashid52.photoeditor.PhotoEditor;
 import ja.burhanrashid52.photoeditor.PhotoEditorView;
-import ja.burhanrashid52.photoeditor.PhotoFilter;
+import ja.burhanrashid52.photoeditor.SaveSettings;
+import ja.burhanrashid52.photoeditor.TextStyleBuilder;
+
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -39,14 +50,20 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
     ImageButton cropBtn, filterBtn, toneBtn, brushBtn, emojiBtn, textBtn, brightBtn, colorBtn, rotateLeftBtn, rotateRightBtn;
     PhotoEditor mPhotoEditor;
     PropertiesBSFragment mPropertiesBSFragment;
+    private PhotoEditorView mPhotoEditorView;
+    private FileSaveHelper mSaveFileHelper;
     ConstraintSet mConstraintSet = new ConstraintSet();
     boolean mIsFilterVisible;
     RecyclerView mRvFilters;
     ConstraintLayout mRootView;
+    Uri mSaveImageUri;
+    public static final String ACTION_NEXTGEN_EDIT = "action_nextgen_edit";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_picture);
+
 
         Bundle data = getIntent().getExtras();
         Uri imageUri = data.getParcelable("imageUri");
@@ -80,20 +97,81 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         setupPhotoEditor();
 
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.undo_opt:
+
+                return true;
+            case R.id.redo_opt:
+
+                return true;
+            case R.id.done_opt:
+                saveImage();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     private void setupPhotoEditor() {
         brushBtn.setOnClickListener(v -> {
             mPhotoEditor.setBrushDrawingMode(true);
-
-            showBottomSheetDialogFragment(mPropertiesBSFragment);
-
+            showBottomSheetDialogFragment(mPropertiesBSFragment);                                   //show fragment custom brush
+        });
+        textBtn.setOnClickListener(v -> {
+            TextEditorDialogFragment textEditorDialogFragment = TextEditorDialogFragment.show(this);
+            textEditorDialogFragment.setOnTextEditorListener(new TextEditorDialogFragment.TextEditor() {
+                @Override
+                public void onDone(String inputText, int colorCode) {
+                    final TextStyleBuilder styleBuilder = new TextStyleBuilder();
+                    styleBuilder.withTextColor(colorCode);
+                    mPhotoEditor.addText(inputText, styleBuilder);
+                }
+            });
         });
 
 
-
-
-
     }
+
+    public static boolean isSdkHigherThan28() {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
+    }
+
+    private void saveImage() {
+        final String fileName = System.currentTimeMillis() + ".png";
+        final boolean hasStoragePermission =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PERMISSION_GRANTED;
+        if(hasStoragePermission || isSdkHigherThan28()) {
+            mSaveFileHelper.createFile(fileName, (fileCreated, filePath, error, uri) -> {
+                if (fileCreated) {
+                    SaveSettings saveSettings = new SaveSettings.Builder()
+                            .setClearViewsEnabled(true)
+                            .setTransparencyEnabled(true)
+                            .build();
+
+                    mPhotoEditor.saveAsFile(filePath, saveSettings, new PhotoEditor.OnSaveListener() {
+                        @Override
+                        public void onSuccess(@NonNull String imagePath) {
+                            mSaveFileHelper.notifyThatFileIsNowPubliclyAvailable(getContentResolver());
+                            Toast.makeText(EditPic.this, "Image Saved Successfully", Toast.LENGTH_SHORT).show();
+                            mSaveImageUri = uri;
+                            mPhotoEditorView.getSource().setImageURI(mSaveImageUri);
+                        }
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            Toast.makeText(EditPic.this, "Failed to save Image", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                } else {
+                    Toast.makeText(EditPic.this, error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
 
     void showFilter(boolean isVisible) {
         mIsFilterVisible = isVisible;
