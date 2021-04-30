@@ -56,5 +56,39 @@ public class VideoInfo extends Media implements Parcelable {
         this.duration = duration;
     }
 
+    @Override
+    public String toString() {
+        return this.uri.toString() +
+                "|" +
+                this.size +
+                "|" +
+                this.date +
+                "|" +
+                this.resolution +
+                "|" +
+                this.MEDIA_TYPE +
+                "|" +
+                this.fileName +
+                "|" +
+                this.location +
+                "|" +
+                this.duration +
+                "|" +
+                this.orientation;
+    }
+
+    public static VideoInfo parseString(String datas[]){
+        Uri uri = Uri.parse(datas[0]);
+        String size = datas[1];
+        String date = datas[2];
+        String resolution = datas[3];
+        int mediaType = Integer.parseInt(datas[4]);
+        String fileName = datas[5];
+        String location = datas[6];
+        int duration = Integer.parseInt(datas[8]);
+        int orientation = Integer.parseInt(datas[8]);
+        return new VideoInfo(uri,size,date,resolution,mediaType,fileName,location,duration,orientation);
+    }
+
 
 }

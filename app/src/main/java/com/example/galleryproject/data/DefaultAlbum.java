@@ -12,24 +12,24 @@ import androidx.room.Entity;
 import java.util.ArrayList;
 
 @Entity
-public class Album implements Parcelable{
+public class DefaultAlbum implements Parcelable{
     ArrayList<Media> mediaArrayList = new ArrayList<>();
     String albumName;
 
-    protected Album(Parcel in) {
+    protected DefaultAlbum(Parcel in) {
         mediaArrayList = in.createTypedArrayList(Media.CREATOR);
         albumName = in.readString();
     }
 
-    public static final Creator<Album> CREATOR = new Creator<Album>() {
+    public static final Creator<DefaultAlbum> CREATOR = new Creator<DefaultAlbum>() {
         @Override
-        public Album createFromParcel(Parcel in) {
-            return new Album(in);
+        public DefaultAlbum createFromParcel(Parcel in) {
+            return new DefaultAlbum(in);
         }
 
         @Override
-        public Album[] newArray(int size) {
-            return new Album[size];
+        public DefaultAlbum[] newArray(int size) {
+            return new DefaultAlbum[size];
         }
     };
 
@@ -75,7 +75,7 @@ public class Album implements Parcelable{
         }
     }
 
-    public Album(String albumName) {
+    public DefaultAlbum(String albumName) {
         this.albumName = albumName;
     }
 

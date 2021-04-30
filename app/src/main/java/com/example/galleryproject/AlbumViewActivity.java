@@ -9,14 +9,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 
-import com.example.galleryproject.data.Album;
+import com.example.galleryproject.data.DefaultAlbum;
 import com.example.galleryproject.data.Media;
 
 import java.util.ArrayList;
 
 
 public class AlbumViewActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener, View.OnLongClickListener {
-    ArrayList<Album> albumArrayList = new ArrayList<>();
+    ArrayList<DefaultAlbum> defaultAlbumArrayList = new ArrayList<>();
     ArrayList<Media> mediaArrayList = new ArrayList<>();
     RecyclerView listViewAllAlbum;
     RecyclerView gridViewAllMedia;
@@ -33,12 +33,12 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
         //get all album data
         int len = this.albumSelectedPos = data.getInt("albumLen");
         for (int i = 0; i < len; i++)
-            albumArrayList.add(data.getParcelable(String.valueOf(i)));
+            defaultAlbumArrayList.add(data.getParcelable(String.valueOf(i)));
 
         this.albumSelectedPos = data.getInt("albumPos");
 
         // set up album recycleView
-        ThumbnailAlbumAdapter thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(this.albumArrayList, this, this);
+        ThumbnailAlbumAdapter thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(this.defaultAlbumArrayList, this, this);
 
         this.listViewAllAlbum = findViewById(R.id.list_view_thumbnail_album);
         this.listViewAllAlbum.setAdapter(thumbnailAlbumAdapter);
@@ -49,7 +49,7 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
 
 
         // get all media of album
-        this.mediaArrayList = this.albumArrayList.get(this.albumSelectedPos).getMediaArrayList();
+        this.mediaArrayList = this.defaultAlbumArrayList.get(this.albumSelectedPos).getMediaArrayList();
 
         //set up  recycleView
         this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaArrayList, this, this, this);
@@ -63,7 +63,7 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
         ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder viewHolder = (ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder) v.getTag();
         int pos = viewHolder.getAdapterPosition();
         if (pos != this.albumSelectedPos) {
-            this.mediaArrayList = this.albumArrayList.get(pos).getMediaArrayList();
+            this.mediaArrayList = this.defaultAlbumArrayList.get(pos).getMediaArrayList();
             this.thumbnailPictureAdapter.setMediaArrayList(this.mediaArrayList);
             this.thumbnailPictureAdapter.notifyDataChange();
             this.albumSelectedPos = pos;

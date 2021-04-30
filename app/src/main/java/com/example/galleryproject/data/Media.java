@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class Media implements Parcelable {
+public abstract class Media implements Parcelable {
     final Uri uri;
     final String size;
     final String date;
@@ -62,6 +62,8 @@ public class Media implements Parcelable {
             return new Media[size];
         }
     };
+
+
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -107,11 +109,11 @@ public class Media implements Parcelable {
     }
 
 
-    private static int findAlbumPos(ArrayList<Album> albumArrayList, String newAlbumName) {
-        int len = albumArrayList.size();
+    private static int findAlbumPos(ArrayList<DefaultAlbum> defaultAlbumArrayList, String newAlbumName) {
+        int len = defaultAlbumArrayList.size();
         for (int i = 0; i < len; i++) {
             try {
-                if (albumArrayList.get(i).getAlbumName().compareTo(newAlbumName) == 0) {
+                if (defaultAlbumArrayList.get(i).getAlbumName().compareTo(newAlbumName) == 0) {
                     return i;
                 }
             } catch (Exception e) {
@@ -123,7 +125,7 @@ public class Media implements Parcelable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
-    public static void getAllMedia(Context context, ArrayList<Media> mediaArrayList, ArrayList<Album> albumArrayList) {
+    public static void getAllMedia(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList) {
         // get all pic and vid
         String[] projection = {
                 MediaStore.MediaColumns.DATA,
@@ -210,19 +212,19 @@ public class Media implements Parcelable {
             if (bucketName == null) {
                 bucketName = "0";
             }
-            int pos = findAlbumPos(albumArrayList, bucketName);
+            int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
             if (pos == -1) {
-                albumArrayList.add(new Album(bucketName));
-                pos = albumArrayList.size() - 1;
+                defaultAlbumArrayList.add(new DefaultAlbum(bucketName));
+                pos = defaultAlbumArrayList.size() - 1;
             }
-            if (albumArrayList != null)
-                albumArrayList.get(pos).addMedia(nextMedia);
+            if (defaultAlbumArrayList != null)
+                defaultAlbumArrayList.get(pos).addMedia(nextMedia);
 
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public static void getAllMediaUri(Context context, ArrayList<Media> mediaArrayList, ArrayList<Album> albumArrayList) {
+    public static void getAllMediaUri(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList) {
         // get all pic and vid
         String[] projection = {
                 MediaStore.MediaColumns.DATA,
@@ -300,7 +302,7 @@ public class Media implements Parcelable {
 
                 nextMedia = new VideoInfo(contentUri, null, null, null, mediaType, null, null, duration, orientation);
                 mediaArrayList.add(nextMedia);
-                addVideoToAlbumList(bucketName, albumArrayList, (VideoInfo) nextMedia);
+                addVideoToAlbumList(bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
 
             } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                 // get thumbnail img
@@ -327,10 +329,10 @@ public class Media implements Parcelable {
 //                }
                 nextMedia = new ImageInfo(contentUri, null, null, null, mediaType, null, location, orientation);
                 mediaArrayList.add(nextMedia);
-                addImageToAlbumList(bucketName, albumArrayList, (ImageInfo) nextMedia);
+                addImageToAlbumList(bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
             }
         }
-
+        cursor.close();
     }
 
 
@@ -358,59 +360,51 @@ public class Media implements Parcelable {
         return null;
     }
 
-    private static void addImageToAlbumList(String bucketName, ArrayList<Album> albumArrayList, ImageInfo nextMedia) {
+    private static void addImageToAlbumList(String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, ImageInfo nextMedia) {
 
         // check if bucket name is existed
-        if (albumArrayList == null) {
+        if (defaultAlbumArrayList == null) {
             return;
         }
         if (bucketName == null) {
             bucketName = "0";
         }
-        int pos = findAlbumPos(albumArrayList, bucketName);
+        int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
         if (pos == -1) {
-            albumArrayList.add(new Album(bucketName));
-            pos = albumArrayList.size() - 1;
+            defaultAlbumArrayList.add(new DefaultAlbum(bucketName));
+            pos = defaultAlbumArrayList.size() - 1;
         }
 
-        albumArrayList.get(pos).addImageInfo(nextMedia);
+        defaultAlbumArrayList.get(pos).addImageInfo(nextMedia);
     }
 
-    private static void addVideoToAlbumList(String bucketName, ArrayList<Album> albumArrayList, VideoInfo nextMedia) {
+    private static void addVideoToAlbumList(String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, VideoInfo nextMedia) {
 
         // check if bucket name is existed
-        if (albumArrayList == null) {
+        if (defaultAlbumArrayList == null) {
             return;
         }
         if (bucketName == null) {
             bucketName = "0";
         }
-        int pos = findAlbumPos(albumArrayList, bucketName);
+        int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
         if (pos == -1) {
-            albumArrayList.add(new Album(bucketName));
-            pos = albumArrayList.size() - 1;
+            defaultAlbumArrayList.add(new DefaultAlbum(bucketName));
+            pos = defaultAlbumArrayList.size() - 1;
         }
 
-        albumArrayList.get(pos).addVideoInfo(nextMedia);
+        defaultAlbumArrayList.get(pos).addVideoInfo(nextMedia);
     }
 
-    @NonNull
     @Override
-    public String toString() {
-        return this.uri.toString() +
-                "|" +
-                this.size +
-                "|" +
-                this.date +
-                "|" +
-                this.resolution +
-                "|" +
-                this.getMEDIA_TYPE() +
-                "|" +
-                this.fileName +
-                "|" +
-                this.location +
-                "|" +
-                this.orientation;
+    public abstract String toString();
+
+    public static Media parseString(String data){
+        String datas[] = data.split("\\|");
+        if(Integer.parseInt(datas[4]) == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE)
+            return ImageInfo.parseString(datas);
+        else if (Integer.parseInt(datas[4]) == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE)
+            return VideoInfo.parseString(datas);
+        return null;
     }
 }
