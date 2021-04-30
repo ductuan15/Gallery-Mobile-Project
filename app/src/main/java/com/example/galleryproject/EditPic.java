@@ -34,7 +34,7 @@ import ja.burhanrashid52.photoeditor.PhotoFilter;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class EditPic extends AppCompatActivity {
+public class EditPic extends AppCompatActivity implements PropertiesBSFragment.Properties {
 
     ImageButton cropBtn, filterBtn, toneBtn, brushBtn, emojiBtn, textBtn, brightBtn, colorBtn, rotateLeftBtn, rotateRightBtn;
     PhotoEditor mPhotoEditor;
@@ -63,6 +63,8 @@ public class EditPic extends AppCompatActivity {
                 .setDefaultEmojiTypeface(mEmojiTypeFace)
                 .build();
 
+        mPropertiesBSFragment = new PropertiesBSFragment();
+        mPropertiesBSFragment.setPropertiesChangeListener(this);
         //set up button
         cropBtn = findViewById(R.id.crop_button);
         filterBtn = findViewById(R.id.filter_button);
@@ -82,16 +84,11 @@ public class EditPic extends AppCompatActivity {
     private void setupPhotoEditor() {
         brushBtn.setOnClickListener(v -> {
             mPhotoEditor.setBrushDrawingMode(true);
-            // showBottomSheetDialogFragment(mPropertiesBSFragment);
-            Toast.makeText(this, "Brush", Toast.LENGTH_SHORT).show();
-            Log.d("Editor", "setupPhotoEditor: Brush");
-        });
-        filterBtn.setOnClickListener(v -> {
-            showFilter(true);
-            Toast.makeText(this, "Filter", Toast.LENGTH_SHORT).show();
-            Log.d("Editor", "setupPhotoEditor: Bright");
+
+            showBottomSheetDialogFragment(mPropertiesBSFragment);
 
         });
+
 
 
 
@@ -139,6 +136,21 @@ public class EditPic extends AppCompatActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
+    }
+
+    @Override
+    public void onColorChanged(int colorCode) {
+        mPhotoEditor.setBrushColor(colorCode);
+    }
+
+    @Override
+    public void onOpacityChanged(int opacity) {
+        mPhotoEditor.setOpacity(opacity);
+    }
+
+    @Override
+    public void onBrushSizeChanged(int brushSize) {
+        mPhotoEditor.setBrushSize(brushSize);
     }
 }
 
