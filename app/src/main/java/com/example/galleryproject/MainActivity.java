@@ -28,13 +28,18 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.preference.PreferenceManager;
 
-import com.example.galleryproject.data.Album;
+import com.example.galleryproject.data.CreatedAlbum;
+import com.example.galleryproject.data.CreatedAlbumViewModel;
+import com.example.galleryproject.data.DefaultAlbum;
 import com.example.galleryproject.data.Media;
 import com.example.galleryproject.ui.allpic.AllPicFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -56,9 +61,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     public ArrayList<Media> mediaArrayList = new ArrayList<>();
-    public ArrayList<Album> albumArrayList = new ArrayList<>();
+    public ArrayList<DefaultAlbum> defaultAlbumArrayList = new ArrayList<>();
+    public ArrayList<CreatedAlbum> createdAlbumArrayList =  new ArrayList<>();
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
+
+    public CreatedAlbumViewModel createdAlbumViewModel;
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +109,14 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
+
+//        this.createdAlbumViewModel = new ViewModelProvider(this).get(CreatedAlbumViewModel.class);
+//        this.createdAlbumViewModel.getAllCreatedAlbum().observe(this, new Observer<List<CreatedAlbum>>() {
+//            @Override
+//            public void onChanged(List<CreatedAlbum> createdAlbums) {
+//
+//            }
+//        });
         //request for all permission
         askingForPermission();
 
@@ -229,10 +246,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     @RequiresApi(api = Build.VERSION_CODES.R)
-    private void getAllDataSet() {
+    public void getAllDataSet() {
         this.mediaArrayList.clear();
-        this.albumArrayList.clear();
-        Media.getAllMediaUri(this, this.mediaArrayList, this.albumArrayList);
+        this.defaultAlbumArrayList.clear();
+        Media.getAllMediaUri(this, this.mediaArrayList, this.defaultAlbumArrayList);
         Log.e("", "getAllDataSet: ");
     }
 }

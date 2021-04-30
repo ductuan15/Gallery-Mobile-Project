@@ -11,14 +11,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.galleryproject.data.Album;
+import com.example.galleryproject.data.DefaultAlbum;
 
 import java.util.ArrayList;
 
 public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder> {
 
 
-    ArrayList<Album> albumArrayList;
+    ArrayList<DefaultAlbum> defaultAlbumArrayList;
     Context context;
     // this interface will listen to click
     private final View.OnClickListener onItemClickListener;
@@ -40,9 +40,9 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
 
     }
 
-    public  ThumbnailAlbumAdapter(ArrayList<Album> albumArrayList, View.OnClickListener onItemClickListener, Context context){
+    public  ThumbnailAlbumAdapter(ArrayList<DefaultAlbum> defaultAlbumArrayList, View.OnClickListener onItemClickListener, Context context){
         this.context = context;
-        this.albumArrayList = albumArrayList;
+        this.defaultAlbumArrayList = defaultAlbumArrayList;
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -57,24 +57,24 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     // TODO: get element  according to position
     @Override
     public void onBindViewHolder(@NonNull ThumbnailAlbumViewHolder holder, int position) {
-        Album album = this.albumArrayList.get(position);
+        DefaultAlbum defaultAlbum = this.defaultAlbumArrayList.get(position);
         // TODO:replace the image that we need
         Glide.with(this.context)
-                .load(album.getUriThumbnail())
+                .load(defaultAlbum.getUriThumbnail())
                 .placeholder(R.drawable.ic_noun_cat_search_232263)
                 .error(R.drawable.ic_noun_cat_search_232263)
                 .centerCrop()
                 .fitCenter()
                 .into(holder.imageView);
         // TODO: replace by the name of albums
-        holder.albumNameTextView.setText(album.getAlbumName());
+        holder.albumNameTextView.setText(defaultAlbum.getAlbumName());
     }
 
 
     //return number of items
     @Override
     public int getItemCount() {
-        return this.albumArrayList.size();
+        return this.defaultAlbumArrayList.size();
     }
     public void notifyDataChange(){
         this.notifyDataSetChanged();
