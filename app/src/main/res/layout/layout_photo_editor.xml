@@ -59,14 +59,6 @@
                 android:layout_height="wrap_content"
 
                 android:src="@drawable/ic_baseline_title_24" />
-
-            <ImageButton
-                android:id="@+id/brightness_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-
-                android:src="@drawable/ic_baseline_brightness_medium_24"/>
             <ImageButton
                 android:id="@+id/color_button"
                 style="?android:attr/buttonBarButtonStyle"
