@@ -27,6 +27,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.galleryproject.edit.EmojiBSFragment;
 import com.example.galleryproject.edit.FileSaveHelper;
 import com.example.galleryproject.edit.PropertiesBSFragment;
 import com.example.galleryproject.edit.TextEditorDialogFragment;
@@ -45,10 +46,12 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class EditPic extends AppCompatActivity implements PropertiesBSFragment.Properties {
+public class EditPic extends AppCompatActivity implements PropertiesBSFragment.Properties,
+        EmojiBSFragment.EmojiListener {
 
-    ImageButton cropBtn, filterBtn, toneBtn, brushBtn, emojiBtn, textBtn, brightBtn, colorBtn, rotateLeftBtn, rotateRightBtn;
+    ImageButton cropBtn, filterBtn, toneBtn, brushBtn, eraserBtn, emojiBtn, textBtn, brightBtn, colorBtn, rotateLeftBtn, rotateRightBtn;
     PhotoEditor mPhotoEditor;
+    private EmojiBSFragment mEmojiBSFragment;
     PropertiesBSFragment mPropertiesBSFragment;
     private PhotoEditorView mPhotoEditorView;
     private FileSaveHelper mSaveFileHelper;
@@ -56,9 +59,7 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
     boolean mIsFilterVisible;
     RecyclerView mRvFilters;
     ConstraintLayout mRootView;
-
     Uri mSaveImageUri;
-    public static final String ACTION_NEXTGEN_EDIT = "action_nextgen_edit";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,24 +71,22 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         Uri imageUri = data.getParcelable("imageUri");
         mPhotoEditorView = findViewById(R.id.photoEditorView);
         mPhotoEditorView.getSource().setImageURI(imageUri);
-        Typeface mTextRobotoTf = ResourcesCompat.getFont(this, R.font.roboto_medium);
-
-        //loading font from assest
-        Typeface mEmojiTypeFace = Typeface.createFromAsset(getAssets(), "emojione-android.ttf");
 
         mPhotoEditor = new PhotoEditor.Builder(this, mPhotoEditorView)
                 .setPinchTextScalable(true)
-                .setDefaultTextTypeface(mTextRobotoTf)
-                .setDefaultEmojiTypeface(mEmojiTypeFace)
                 .build();
 
         mPropertiesBSFragment = new PropertiesBSFragment();
         mPropertiesBSFragment.setPropertiesChangeListener(this);
+
+        mEmojiBSFragment = new EmojiBSFragment();
+        mEmojiBSFragment.setEmojiListener(this);
         //set up button
         cropBtn = findViewById(R.id.crop_button);
         filterBtn = findViewById(R.id.filter_button);
         toneBtn = findViewById(R.id.tonality_button);
         brushBtn = findViewById(R.id.brush_button);
+        eraserBtn = findViewById(R.id.eraser_button);
         emojiBtn = findViewById(R.id.emoji_button);
         textBtn = findViewById(R.id.addtext_button);
         brightBtn = findViewById(R.id.brightness_button);
@@ -123,6 +122,11 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
             mPhotoEditor.setBrushDrawingMode(true);
             showBottomSheetDialogFragment(mPropertiesBSFragment);                                   //show fragment custom brush
         });
+
+        eraserBtn.setOnClickListener(v -> {
+            mPhotoEditor.brushEraser();
+        });
+
         textBtn.setOnClickListener(v -> {
             TextEditorDialogFragment textEditorDialogFragment = TextEditorDialogFragment.show(this);
             textEditorDialogFragment.setOnTextEditorListener(new TextEditorDialogFragment.TextEditor() {
@@ -135,6 +139,9 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
             });
         });
 
+        emojiBtn.setOnClickListener(v -> {
+            showBottomSheetDialogFragment(mEmojiBSFragment);
+        });
 
     }
 
@@ -168,7 +175,6 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
                             Toast.makeText(EditPic.this, "Failed to save Image", Toast.LENGTH_SHORT).show();
                         }
                     });
-
                 } else {
                     Toast.makeText(EditPic.this, error, Toast.LENGTH_SHORT).show();
                 }
@@ -234,6 +240,11 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
     @Override
     public void onBrushSizeChanged(int brushSize) {
         mPhotoEditor.setBrushSize(brushSize);
+    }
+
+    @Override
+    public void onEmojiClick(String emojiUnicode) {
+        mPhotoEditor.addEmoji(emojiUnicode);
     }
 }
 

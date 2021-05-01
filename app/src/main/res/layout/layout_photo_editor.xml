@@ -38,14 +38,18 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="55dp"
                 android:layout_height="wrap_content"
-
                 android:src="@drawable/ic_baseline_brush_24"/>
+            <ImageButton
+                android:id="@+id/eraser_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_eraser"/>
             <ImageButton
                 android:id="@+id/emoji_button"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="55dp"
                 android:layout_height="wrap_content"
-
                 android:src="@drawable/ic_baseline_insert_emoticon_24"/>
 
             <ImageButton
