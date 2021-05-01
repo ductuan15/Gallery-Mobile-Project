@@ -49,7 +49,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 public class EditPic extends AppCompatActivity implements PropertiesBSFragment.Properties,
         EmojiBSFragment.EmojiListener {
 
-    ImageButton cropBtn, filterBtn, toneBtn, brushBtn, eraserBtn, emojiBtn, textBtn, brightBtn, colorBtn, rotateLeftBtn, rotateRightBtn;
+    ImageButton cropBtn, filterBtn, toneBtn, brushBtn, eraserBtn, emojiBtn, textBtn, colorBtn, rotateLeftBtn, rotateRightBtn;
     PhotoEditor mPhotoEditor;
     private EmojiBSFragment mEmojiBSFragment;
     PropertiesBSFragment mPropertiesBSFragment;
@@ -89,7 +89,6 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         eraserBtn = findViewById(R.id.eraser_button);
         emojiBtn = findViewById(R.id.emoji_button);
         textBtn = findViewById(R.id.addtext_button);
-        brightBtn = findViewById(R.id.brightness_button);
         colorBtn = findViewById(R.id.color_button);
         rotateLeftBtn = findViewById(R.id.rotate_left_button);
         rotateRightBtn = findViewById(R.id.rotate_right_button);
@@ -104,10 +103,10 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.undo_opt:
-
+                mPhotoEditor.undo();
                 return true;
             case R.id.redo_opt:
-
+                mPhotoEditor.redo();
                 return true;
             case R.id.done_opt:
                 saveImage();
@@ -142,6 +141,7 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         emojiBtn.setOnClickListener(v -> {
             showBottomSheetDialogFragment(mEmojiBSFragment);
         });
+
 
     }
 
