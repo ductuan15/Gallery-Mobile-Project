@@ -56,6 +56,7 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
     boolean mIsFilterVisible;
     RecyclerView mRvFilters;
     ConstraintLayout mRootView;
+
     Uri mSaveImageUri;
     public static final String ACTION_NEXTGEN_EDIT = "action_nextgen_edit";
 
@@ -67,7 +68,7 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
 
         Bundle data = getIntent().getExtras();
         Uri imageUri = data.getParcelable("imageUri");
-        PhotoEditorView mPhotoEditorView = findViewById(R.id.photoEditorView);
+        mPhotoEditorView = findViewById(R.id.photoEditorView);
         mPhotoEditorView.getSource().setImageURI(imageUri);
         Typeface mTextRobotoTf = ResourcesCompat.getFont(this, R.font.roboto_medium);
 
@@ -94,7 +95,9 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         rotateLeftBtn = findViewById(R.id.rotate_left_button);
         rotateRightBtn = findViewById(R.id.rotate_right_button);
 
+
         setupPhotoEditor();
+        mSaveFileHelper = new FileSaveHelper(this);
 
     }
     @Override
@@ -140,17 +143,17 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
     }
 
     private void saveImage() {
+
         final String fileName = System.currentTimeMillis() + ".png";
         final boolean hasStoragePermission =
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PERMISSION_GRANTED;
         if(hasStoragePermission || isSdkHigherThan28()) {
             mSaveFileHelper.createFile(fileName, (fileCreated, filePath, error, uri) -> {
                 if (fileCreated) {
-                    SaveSettings saveSettings = new SaveSettings.Builder()
+                    SaveSettings saveSettings = new SaveSettings.Builder() //gì v?
                             .setClearViewsEnabled(true)
                             .setTransparencyEnabled(true)
                             .build();
-
                     mPhotoEditor.saveAsFile(filePath, saveSettings, new PhotoEditor.OnSaveListener() {
                         @Override
                         public void onSuccess(@NonNull String imagePath) {
@@ -158,6 +161,7 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
                             Toast.makeText(EditPic.this, "Image Saved Successfully", Toast.LENGTH_SHORT).show();
                             mSaveImageUri = uri;
                             mPhotoEditorView.getSource().setImageURI(mSaveImageUri);
+
                         }
                         @Override
                         public void onFailure(@NonNull Exception exception) {
@@ -170,6 +174,7 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
                 }
             });
         }
+        onBackPressed();
     }
 
 
