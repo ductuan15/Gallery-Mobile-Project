@@ -6,6 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.ChangeBounds;
 import androidx.transition.TransitionManager;
@@ -31,12 +32,15 @@ import com.example.galleryproject.edit.EmojiBSFragment;
 import com.example.galleryproject.edit.FileSaveHelper;
 import com.example.galleryproject.edit.PropertiesBSFragment;
 import com.example.galleryproject.edit.TextEditorDialogFragment;
+import com.example.galleryproject.edit.filters.FilterListener;
+import com.example.galleryproject.edit.filters.FilterViewAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.io.IOException;
 
 import ja.burhanrashid52.photoeditor.PhotoEditor;
 import ja.burhanrashid52.photoeditor.PhotoEditorView;
+import ja.burhanrashid52.photoeditor.PhotoFilter;
 import ja.burhanrashid52.photoeditor.SaveSettings;
 import ja.burhanrashid52.photoeditor.TextStyleBuilder;
 
@@ -47,7 +51,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
  * status bar and navigation/system bar) with user interaction.
  */
 public class EditPic extends AppCompatActivity implements PropertiesBSFragment.Properties,
-        EmojiBSFragment.EmojiListener {
+        EmojiBSFragment.EmojiListener,
+        FilterListener {
 
     ImageButton cropBtn, filterBtn, toneBtn, brushBtn, eraserBtn, emojiBtn, textBtn, colorBtn, rotateLeftBtn, rotateRightBtn;
     PhotoEditor mPhotoEditor;
@@ -56,8 +61,9 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
     private PhotoEditorView mPhotoEditorView;
     private FileSaveHelper mSaveFileHelper;
     ConstraintSet mConstraintSet = new ConstraintSet();
-    boolean mIsFilterVisible;
-    RecyclerView mRvFilters;
+    private RecyclerView mRvFilters;
+    private FilterViewAdapter mFilterViewAdapter = new FilterViewAdapter(this);
+    private boolean mIsFilterVisible;
     ConstraintLayout mRootView;
     Uri mSaveImageUri;
 
@@ -81,6 +87,11 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
 
         mEmojiBSFragment = new EmojiBSFragment();
         mEmojiBSFragment.setEmojiListener(this);
+
+        LinearLayoutManager llmFilters = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mRvFilters.setLayoutManager(llmFilters);
+        mRvFilters.setAdapter(mFilterViewAdapter);
+        mRvFilters = findViewById(R.id.rvFilterView);
         //set up button
         cropBtn = findViewById(R.id.crop_button);
         filterBtn = findViewById(R.id.filter_button);
@@ -116,6 +127,8 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         }
     }
 
+
+
     private void setupPhotoEditor() {
         brushBtn.setOnClickListener(v -> {
             mPhotoEditor.setBrushDrawingMode(true);
@@ -142,7 +155,9 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
             showBottomSheetDialogFragment(mEmojiBSFragment);
         });
 
-
+        filterBtn.setOnClickListener(v -> {
+            showFilter(true);
+        });
     }
 
     public static boolean isSdkHigherThan28() {
@@ -245,6 +260,21 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
     @Override
     public void onEmojiClick(String emojiUnicode) {
         mPhotoEditor.addEmoji(emojiUnicode);
+    }
+
+    @Override
+    public void onFilterSelected(PhotoFilter photoFilter) {
+        mPhotoEditor.setFilterEffect(photoFilter);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mIsFilterVisible) {
+            showFilter(false);
+        }
+        else {
+            super.onBackPressed();
+        }
     }
 }
 
