@@ -73,4 +73,7 @@ dependencies {
 
     //photo editor
     implementation 'com.burhanrashid52:photoeditor:1.1.1'
+
+    //crop image
+    api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
 }

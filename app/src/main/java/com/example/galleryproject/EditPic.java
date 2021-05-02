@@ -35,6 +35,7 @@ import com.example.galleryproject.edit.TextEditorDialogFragment;
 import com.example.galleryproject.edit.filters.FilterListener;
 import com.example.galleryproject.edit.filters.FilterViewAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.IOException;
 
@@ -66,6 +67,7 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
     private boolean mIsFilterVisible;
     ConstraintLayout mRootView;
     Uri mSaveImageUri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +111,11 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
 
         setupPhotoEditor();
         mSaveFileHelper = new FileSaveHelper(this);
+
+        cropBtn.setOnClickListener(v -> {
+            CropImage.activity(imageUri)
+                    .start(this);
+        });
 
     }
     @Override
@@ -160,6 +167,27 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         filterBtn.setOnClickListener(v -> {
             showFilter(true);
         });
+
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // handle result of CropImageActivity
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Intent editIntent = new Intent(this, EditPic.class);
+                Bundle cropData = new Bundle();
+                cropData.putParcelable("imageUri", result.getUri());
+                editIntent.putExtras(cropData);
+                startActivity(editIntent);
+                Toast.makeText(this, "Cropping successful", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Toast.makeText(this, "Cropping failed: " + result.getError(), Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     public static boolean isSdkHigherThan28() {

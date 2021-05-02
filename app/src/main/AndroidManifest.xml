@@ -52,6 +52,7 @@
             <!-- <data android:mimeType="" -->
             <!-- </intent-filter> -->
         </activity>
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
     </application>
 
 </manifest>
