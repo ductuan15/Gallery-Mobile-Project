@@ -88,10 +88,12 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         mEmojiBSFragment = new EmojiBSFragment();
         mEmojiBSFragment.setEmojiListener(this);
 
+        mRvFilters = findViewById(R.id.rvFilterView);
         LinearLayoutManager llmFilters = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRvFilters.setLayoutManager(llmFilters);
         mRvFilters.setAdapter(mFilterViewAdapter);
-        mRvFilters = findViewById(R.id.rvFilterView);
+        mRootView = findViewById(R.id.rootView);
+
         //set up button
         cropBtn = findViewById(R.id.crop_button);
         filterBtn = findViewById(R.id.filter_button);

@@ -1,37 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/rootView"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/fullscreenBackgroundColor"
     android:theme="@style/ThemeOverlay.GalleryProject.FullscreenContainer"
     tools:context=".EditPic">
-
-    <!-- The primary full-screen view. This can be replaced with whatever view
-         is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc. -->
-    <ja.burhanrashid52.photoeditor.PhotoEditorView
-        android:id="@+id/photoEditorView"
+    <HorizontalScrollView
+        android:id="@+id/rvConstraintTools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:layout_height="wrap_content"
+        style="@style/Widget.Theme.GalleryProject.ButtonBar.Fullscreen"
+        android:layout_gravity="bottom|center_horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
-            android:id="@+id/fullscreen_content_controls"
-            style="@style/Widget.Theme.GalleryProject.ButtonBar.Fullscreen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/white"
             android:orientation="horizontal"
-            tools:ignore="UselessParent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
-            <include layout="@layout/layout_photo_editor" />
+            <ImageButton
+                android:id="@+id/crop_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_crop_24"/>
+            <ImageButton
+                android:id="@+id/filter_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_filter_none_24"/>
+            <ImageButton
+                android:id="@+id/tonality_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_tonality_24"/>
+            <ImageButton
+                android:id="@+id/brush_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_brush_24"/>
+            <ImageButton
+                android:id="@+id/eraser_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_eraser"/>
+            <ImageButton
+                android:id="@+id/emoji_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_insert_emoticon_24"/>
 
+            <ImageButton
+                android:id="@+id/addtext_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_title_24" />
+            <ImageButton
+                android:id="@+id/color_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_color_lens_24"/>
+            <ImageButton
+                android:id="@+id/rotate_left_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_rotate_left_24"/>
+            <ImageButton
+                android:id="@+id/rotate_right_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_rotate_right_24"/>
         </LinearLayout>
-    </FrameLayout>
-</FrameLayout>
+    </HorizontalScrollView>
+    <ja.burhanrashid52.photoeditor.PhotoEditorView
+        android:id="@+id/photoEditorView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/rvConstraintTools"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvFilterView"
+        android:layout_width="0dp"
+        android:layout_height="95dp"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="@+id/rvConstraintTools"
+        app:layout_constraintStart_toEndOf="parent" 
+        tools:listitem="@layout/row_filter_view" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
