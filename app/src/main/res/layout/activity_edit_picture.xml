@@ -34,12 +34,12 @@
                 android:layout_width="55dp"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_baseline_filter_none_24"/>
-            <ImageButton
-                android:id="@+id/tonality_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_baseline_tonality_24"/>
+<!--            <ImageButton-->
+<!--                android:id="@+id/tonality_button"-->
+<!--                style="?android:attr/buttonBarButtonStyle"-->
+<!--                android:layout_width="55dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/ic_baseline_tonality_24"/>-->
             <ImageButton
                 android:id="@+id/brush_button"
                 style="?android:attr/buttonBarButtonStyle"
@@ -65,24 +65,24 @@
                 android:layout_width="55dp"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_baseline_title_24" />
-            <ImageButton
-                android:id="@+id/color_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_baseline_color_lens_24"/>
-            <ImageButton
-                android:id="@+id/rotate_left_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_baseline_rotate_left_24"/>
-            <ImageButton
-                android:id="@+id/rotate_right_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_baseline_rotate_right_24"/>
+<!--            <ImageButton-->
+<!--                android:id="@+id/color_button"-->
+<!--                style="?android:attr/buttonBarButtonStyle"-->
+<!--                android:layout_width="55dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/ic_baseline_color_lens_24"/>-->
+<!--            <ImageButton-->
+<!--                android:id="@+id/rotate_left_button"-->
+<!--                style="?android:attr/buttonBarButtonStyle"-->
+<!--                android:layout_width="55dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/ic_baseline_rotate_left_24"/>-->
+<!--            <ImageButton-->
+<!--                android:id="@+id/rotate_right_button"-->
+<!--                style="?android:attr/buttonBarButtonStyle"-->
+<!--                android:layout_width="55dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/ic_baseline_rotate_right_24"/>-->
         </LinearLayout>
     </HorizontalScrollView>
     <ja.burhanrashid52.photoeditor.PhotoEditorView
