@@ -1,15 +1,19 @@
 package com.example.galleryproject.data;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -17,7 +21,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -31,7 +43,6 @@ public abstract class Media implements Parcelable {
     final String fileName;
     final String location;
     final int orientation;
-    boolean isInLockedAlbum = false;
 
     protected Media(Parcel in) {
         uri = in.readParcelable(Uri.class.getClassLoader());
@@ -64,7 +75,6 @@ public abstract class Media implements Parcelable {
     };
 
 
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(MEDIA_TYPE);
@@ -83,6 +93,9 @@ public abstract class Media implements Parcelable {
         return 0;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
 
     public Uri getUri() {
         return uri;
@@ -97,6 +110,10 @@ public abstract class Media implements Parcelable {
     }
 
 
+    public String getDate() {
+        return date;
+    }
+
     public Media(Uri mUri, String mSize, String mDate, String resolution, int media_type, String fileName, String location, int orientation) {
         this.uri = mUri;
         this.size = mSize;
@@ -109,11 +126,11 @@ public abstract class Media implements Parcelable {
     }
 
 
-    private static int findAlbumPos(ArrayList<DefaultAlbum> defaultAlbumArrayList, String newAlbumName) {
+    private static int findAlbumPos(ArrayList<DefaultAlbum> defaultAlbumArrayList, String newAlbumPath) {
         int len = defaultAlbumArrayList.size();
         for (int i = 0; i < len; i++) {
             try {
-                if (defaultAlbumArrayList.get(i).getAlbumName().compareTo(newAlbumName) == 0) {
+                if (defaultAlbumArrayList.get(i).getAlbumPath().compareTo(newAlbumPath) == 0) {
                     return i;
                 }
             } catch (Exception e) {
@@ -129,6 +146,7 @@ public abstract class Media implements Parcelable {
         // get all pic and vid
         String[] projection = {
                 MediaStore.MediaColumns.DATA,
+                MediaStore.Files.FileColumns.PARENT,
                 MediaStore.MediaColumns._ID,
                 MediaStore.Files.FileColumns.DISPLAY_NAME,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,
@@ -137,6 +155,7 @@ public abstract class Media implements Parcelable {
                 MediaStore.MediaColumns.RESOLUTION,
                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                 MediaStore.MediaColumns.DURATION,
+                MediaStore.Files.FileColumns.DISC_NUMBER
         };
         String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                 + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -154,8 +173,9 @@ public abstract class Media implements Parcelable {
 
         float[] coordinate;
         String location = null;
+        String absolutePathOfImage;
         while (cursor.moveToNext()) {
-            String absolutePathOfImage = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
+            absolutePathOfImage = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
 
             // get location of media
             try {
@@ -214,7 +234,7 @@ public abstract class Media implements Parcelable {
             }
             int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
             if (pos == -1) {
-                defaultAlbumArrayList.add(new DefaultAlbum(bucketName));
+                defaultAlbumArrayList.add(new DefaultAlbum(absolutePathOfImage, bucketName));
                 pos = defaultAlbumArrayList.size() - 1;
             }
             if (defaultAlbumArrayList != null)
@@ -229,13 +249,14 @@ public abstract class Media implements Parcelable {
         String[] projection = {
                 MediaStore.MediaColumns.DATA,
                 MediaStore.MediaColumns._ID,
+                MediaStore.Files.FileColumns.RELATIVE_PATH,
+                MediaStore.Files.FileColumns.DISPLAY_NAME,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,
                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                 MediaStore.MediaColumns.DURATION,
-                MediaStore.MediaColumns.ORIENTATION
-
+                MediaStore.MediaColumns.ORIENTATION,
 //                MediaStore.Images.ImageColumns.LATITUDE,
-//                MediaStore.Images.ImageColumns.LONGITUDE
+//                MediaStore.Images.ImageColumns.LONGITUD
         };
         String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                 + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -280,7 +301,9 @@ public abstract class Media implements Parcelable {
 //                e.printStackTrace();
 //            }
 
+            String fileName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME));
 
+            String relavtivePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH));
             // media type
             int mediaType = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE));
 
@@ -300,9 +323,9 @@ public abstract class Media implements Parcelable {
                 contentUri = ContentUris.withAppendedId(
                         MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
 
-                nextMedia = new VideoInfo(contentUri, null, null, null, mediaType, null, null, duration, orientation);
+                nextMedia = new VideoInfo(contentUri, null, null, null, mediaType, fileName, null, duration, orientation);
                 mediaArrayList.add(nextMedia);
-                addVideoToAlbumList(bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
+                addVideoToAlbumList(relavtivePath, bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
 
             } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                 // get thumbnail img
@@ -327,9 +350,9 @@ public abstract class Media implements Parcelable {
 //                } catch (IOException e) {
 //                    e.printStackTrace();
 //                }
-                nextMedia = new ImageInfo(contentUri, null, null, null, mediaType, null, location, orientation);
+                nextMedia = new ImageInfo(contentUri, null, null, null, mediaType, fileName, location, orientation);
                 mediaArrayList.add(nextMedia);
-                addImageToAlbumList(bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
+                addImageToAlbumList(relavtivePath, bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
             }
         }
         cursor.close();
@@ -360,7 +383,7 @@ public abstract class Media implements Parcelable {
         return null;
     }
 
-    private static void addImageToAlbumList(String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, ImageInfo nextMedia) {
+    private static void addImageToAlbumList(String albumPath, String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, ImageInfo nextMedia) {
 
         // check if bucket name is existed
         if (defaultAlbumArrayList == null) {
@@ -369,16 +392,16 @@ public abstract class Media implements Parcelable {
         if (bucketName == null) {
             bucketName = "0";
         }
-        int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
+        int pos = findAlbumPos(defaultAlbumArrayList, albumPath);
         if (pos == -1) {
-            defaultAlbumArrayList.add(new DefaultAlbum(bucketName));
+            defaultAlbumArrayList.add(new DefaultAlbum(albumPath, bucketName));
             pos = defaultAlbumArrayList.size() - 1;
         }
 
         defaultAlbumArrayList.get(pos).addImageInfo(nextMedia);
     }
 
-    private static void addVideoToAlbumList(String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, VideoInfo nextMedia) {
+    private static void addVideoToAlbumList(String albumPath, String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, VideoInfo nextMedia) {
 
         // check if bucket name is existed
         if (defaultAlbumArrayList == null) {
@@ -387,24 +410,59 @@ public abstract class Media implements Parcelable {
         if (bucketName == null) {
             bucketName = "0";
         }
-        int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
+        int pos = findAlbumPos(defaultAlbumArrayList, albumPath);
         if (pos == -1) {
-            defaultAlbumArrayList.add(new DefaultAlbum(bucketName));
+            defaultAlbumArrayList.add(new DefaultAlbum(albumPath, bucketName));
             pos = defaultAlbumArrayList.size() - 1;
         }
 
         defaultAlbumArrayList.get(pos).addVideoInfo(nextMedia);
     }
 
+
     @Override
     public abstract String toString();
 
-    public static Media parseString(String data){
+    public static Media parseString(String data) {
         String datas[] = data.split("\\|");
-        if(Integer.parseInt(datas[4]) == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE)
+        if (Integer.parseInt(datas[4]) == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE)
             return ImageInfo.parseString(datas);
         else if (Integer.parseInt(datas[4]) == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE)
             return VideoInfo.parseString(datas);
         return null;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    public static boolean copyFile(Uri media, String fileName,String albumName, ContentResolver resolver) {
+        InputStream a = null;
+        String albumPath = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + albumName +  File.separator ;
+        try {
+            a = resolver.openInputStream(media);
+            Path path = FileSystems.getDefault().getPath( albumPath + fileName);
+
+            Uri audioCollection;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                audioCollection = MediaStore.Images.Media
+                        .getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+            } else {
+                audioCollection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            }
+            ContentValues newSongDetails = new ContentValues();
+            newSongDetails.put(MediaStore.MediaColumns.RELATIVE_PATH,
+                    Environment.DIRECTORY_DCIM + File.separator + albumName);
+            newSongDetails.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+
+            newSongDetails.put(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME, "albumName");
+
+            Uri myFavoriteSongUri = resolver.insert(audioCollection, newSongDetails);
+            Files.copy(a, path);
+            Log.e("Tag", myFavoriteSongUri.getPath());
+            return true;
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+            return false;
+        }
+
     }
 }

@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.room.Entity;
 
@@ -14,10 +15,12 @@ import java.util.ArrayList;
 @Entity
 public class DefaultAlbum implements Parcelable{
     ArrayList<Media> mediaArrayList = new ArrayList<>();
+    String albumPath;
     String albumName;
 
     protected DefaultAlbum(Parcel in) {
         mediaArrayList = in.createTypedArrayList(Media.CREATOR);
+        albumPath = in.readString();
         albumName = in.readString();
     }
 
@@ -43,11 +46,8 @@ public class DefaultAlbum implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(this.mediaArrayList);
+        dest.writeString(this.albumPath);
         dest.writeString(this.albumName);
-    }
-
-    public void setAlbumName(String albumName) {
-        this.albumName = albumName;
     }
 
 
@@ -75,9 +75,11 @@ public class DefaultAlbum implements Parcelable{
         }
     }
 
-    public DefaultAlbum(String albumName) {
+    public DefaultAlbum(String albumPath, String albumName) {
+        this.albumPath = albumPath;
         this.albumName = albumName;
     }
+
 
     public ArrayList<Media> getMediaArrayList() {
         return mediaArrayList;
@@ -87,9 +89,14 @@ public class DefaultAlbum implements Parcelable{
         return albumName;
     }
 
+    public String getAlbumPath() {return albumPath;}
 
     public Uri getUriThumbnail() {
         return this.mediaArrayList.get(0).getUri();
     }
 
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return super.equals(obj);
+    }
 }

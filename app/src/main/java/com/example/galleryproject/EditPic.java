@@ -82,7 +82,7 @@ public class EditPic extends AppCompatActivity {
     private void setupPhotoEditor() {
         brushBtn.setOnClickListener(v -> {
             mPhotoEditor.setBrushDrawingMode(true);
-            // showBottomSheetDialogFragment(mPropertiesBSFragment);
+            showBottomSheetDialogFragment(mPropertiesBSFragment);
             Toast.makeText(this, "Brush", Toast.LENGTH_SHORT).show();
             Log.d("Editor", "setupPhotoEditor: Brush");
         });
@@ -92,10 +92,6 @@ public class EditPic extends AppCompatActivity {
             Log.d("Editor", "setupPhotoEditor: Bright");
 
         });
-
-
-
-
     }
 
     void showFilter(boolean isVisible) {

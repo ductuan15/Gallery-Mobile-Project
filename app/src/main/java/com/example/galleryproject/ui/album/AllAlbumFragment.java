@@ -59,7 +59,6 @@ public class AllAlbumFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder viewHolder = (ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder) v.getTag();
         int pos = viewHolder.getAdapterPosition();
-        //DefaultAlbum a = ((MainActivity) getActivity()).defaultAlbumArrayList.get(pos);
         Intent intent = new Intent(this.getActivity(), AlbumViewActivity.class);
         Bundle data = new Bundle();
         for (int i = 0; i < this.defaultAlbumArrayList.size(); i++) {

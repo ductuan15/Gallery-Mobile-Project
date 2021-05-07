@@ -8,4 +8,13 @@
         <item name="android:background">@color/black_overlay</item>
         <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>
+
+    <style name="AppTheme.FullScreenDialog" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="colorPrimaryDark">@color/yellow_green_color_picker</item>
+        <item name="colorAccent">@color/yellow_green_color_picker</item>
+        <item name="colorPrimary">@color/yellow_green_color_picker</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="actionMenuTextColor">@color/yellow_green_color_picker</item>
+    </style>
 </resources>

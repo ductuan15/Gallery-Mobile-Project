@@ -62,10 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
     public ArrayList<Media> mediaArrayList = new ArrayList<>();
     public ArrayList<DefaultAlbum> defaultAlbumArrayList = new ArrayList<>();
-    public ArrayList<CreatedAlbum> createdAlbumArrayList =  new ArrayList<>();
 
-
-    public CreatedAlbumViewModel createdAlbumViewModel;
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
@@ -108,15 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-
-
-//        this.createdAlbumViewModel = new ViewModelProvider(this).get(CreatedAlbumViewModel.class);
-//        this.createdAlbumViewModel.getAllCreatedAlbum().observe(this, new Observer<List<CreatedAlbum>>() {
-//            @Override
-//            public void onChanged(List<CreatedAlbum> createdAlbums) {
-//
-//            }
-//        });
         //request for all permission
         askingForPermission();
 

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedHashMap;
 
 @Entity(tableName = "create_album")
-public class    CreatedAlbum {
+public class CreatedAlbum {
     @PrimaryKey(autoGenerate = true)
     private int id;
 
@@ -60,7 +60,4 @@ public class    CreatedAlbum {
     public void setLocked(boolean locked) {
         isLocked = locked;
     }
-
-
-
 }
