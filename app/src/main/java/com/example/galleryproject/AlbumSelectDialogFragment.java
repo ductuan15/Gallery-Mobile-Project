@@ -1,8 +1,6 @@
 package com.example.galleryproject;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -21,7 +18,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.selection.Selection;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryproject.data.DefaultAlbum;
@@ -31,12 +27,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.io.File;
 import java.util.ArrayList;
 
-public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar.OnMenuItemClickListener {
+public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar.OnMenuItemClickListener, View.OnClickListener {
     ArrayList<DefaultAlbum> defaultAlbumArrayList;
     ArrayList<Media> mediaArrayList;
+    ThumbnailAlbumAdapter thumbnailAlbumAdapter;
     Selection<Long> selectedItem;
     private Toolbar toolbar;
-    private String action;
+    private final int actionMode;
+    private String actionModeStr;
+    public static int COPY_TO_ALBUM_MODE = 0;
+    public static int MOVE_TO_ALBUM_MODE = 1;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,12 +44,16 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
         setStyle(DialogFragment.STYLE_NORMAL, R.style.AppTheme_FullScreenDialog);
     }
 
-    public AlbumSelectDialogFragment(ArrayList<DefaultAlbum> defaultAlbumArrayList, ArrayList<Media> mediaArrayList, Selection<Long> selectedItem, String action) {
+    public AlbumSelectDialogFragment(ArrayList<DefaultAlbum> defaultAlbumArrayList, ArrayList<Media> mediaArrayList, Selection<Long> selectedItem, int actionMode) {
         super();
         this.selectedItem = selectedItem;
         this.defaultAlbumArrayList = defaultAlbumArrayList;
         this.mediaArrayList = mediaArrayList;
-        this.action = action;
+        this.actionMode = actionMode;
+        if (this.actionMode == AlbumSelectDialogFragment.COPY_TO_ALBUM_MODE)
+            this.actionModeStr = "Copy to album";
+        else if (this.actionMode == AlbumSelectDialogFragment.MOVE_TO_ALBUM_MODE)
+            this.actionModeStr = "Move to album";
     }
 
     @Nullable
@@ -58,7 +62,7 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
 
         View root = inflater.inflate(R.layout.fragment_select_album, container, false);
         toolbar = root.findViewById(R.id.toolbar);
-        ThumbnailAlbumAdapter thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(this.defaultAlbumArrayList, null, this.requireActivity());
+        thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(this.defaultAlbumArrayList, this, this.requireActivity());
         RecyclerView recyclerView = root.findViewById(R.id.select_album_recycleView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3, RecyclerView.VERTICAL, false));
@@ -80,7 +84,7 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
         super.onViewCreated(view, savedInstanceState);
         super.onViewCreated(view, savedInstanceState);
         toolbar.setNavigationOnClickListener(v -> dismiss());
-        toolbar.setTitle(action);
+        toolbar.setTitle(actionModeStr);
         toolbar.inflateMenu(R.menu.album_selection_menu);
         toolbar.setOnMenuItemClickListener(this);
     }
@@ -99,28 +103,50 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
                     .setNegativeButton("Cancel", null)
                     .setPositiveButton("Create", (dialog, which) -> {
                         String albumName = albumText.getText().toString();
-                        String folderName = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + albumName;
-                        File folder = new File(folderName);
+                        String folderPath = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + albumName;
+                        File folder = new File(folderPath);
                         boolean success = true;
                         if (!folder.exists()) {
                             success = folder.mkdirs();
                         }
-                        if (success) {
-                            //((MainActivity) requireActivity()).defaultAlbumArrayList.add(new DefaultAlbum(albumText.getText().toString(), folderName));
-                            for (Long l : selectedItem) {
-                                if (l < Integer.MAX_VALUE && l >= 0) {
-                                    int i = l.intValue();
-                                    Media media = this.mediaArrayList.get(i);
-                                    Media.copyFile(media.getUri(),media.getFileName(),albumName,requireActivity().getContentResolver());
-                                }
-                            }
-                            Toast.makeText(requireActivity(), "Created", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(requireActivity(), "Create Fail", Toast.LENGTH_LONG).show();
+                        if(success){
+                            DefaultAlbum createdAlbum = new DefaultAlbum( Environment.DIRECTORY_DCIM + File.separator + albumName,albumName);
+                            defaultAlbumArrayList.add(createdAlbum);
+                            thumbnailAlbumAdapter.notifyDataSetChanged();
+                            Toast.makeText(requireActivity(),"New album created!", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(requireActivity(),"New album fail to create!", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .show();
         }
         return false;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void onClick(View v) {
+        ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder viewHolder = (ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder) v.getTag();
+        int pos = viewHolder.getAdapterPosition();
+        for (Long l : selectedItem) {
+            if (l < Integer.MAX_VALUE && l >= 0) {
+                int i = l.intValue();
+                Media media = this.mediaArrayList.get(i);
+                int actionStatus;
+                if (this.actionMode == AlbumSelectDialogFragment.COPY_TO_ALBUM_MODE) {
+                    actionStatus = Media.copyFile(media,this.defaultAlbumArrayList.get(pos).getAlbumPath(), requireActivity());
+                } else {
+                    actionStatus = Media.moveFile(media, defaultAlbumArrayList.get(pos), defaultAlbumArrayList.get(media.getAlbumIn()), requireActivity());
+                }
+                if (actionStatus == 0) {
+                    Toast.makeText(requireActivity(), "Failed", Toast.LENGTH_LONG).show();
+                } else if (actionStatus == 1) {
+                    Toast.makeText(requireActivity(), "Successfully", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(requireActivity(), "File existed", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+        this.dismiss();
     }
 }

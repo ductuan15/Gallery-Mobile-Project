@@ -4,4 +4,8 @@
         android:id="@+id/move_to_album_opt"
         android:title="Move to album">
     </item>
+    <item
+        android:id="@+id/copy_to_album_opt"
+        android:title="Copy to album">
+    </item>
 </menu>

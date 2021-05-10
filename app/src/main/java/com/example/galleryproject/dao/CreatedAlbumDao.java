@@ -1,6 +1,4 @@
-package com.example.galleryproject.data;
-
-import android.net.Uri;
+package com.example.galleryproject.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -9,8 +7,8 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import com.example.galleryproject.entity.CreatedAlbum;
+
 import java.util.List;
 
 @Dao

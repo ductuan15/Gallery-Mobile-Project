@@ -1,4 +1,4 @@
-package com.example.galleryproject.data;
+package com.example.galleryproject.entity;
 
 import android.net.Uri;
 
@@ -6,7 +6,8 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-import org.jetbrains.annotations.NotNull;
+import com.example.galleryproject.data.Converter;
+import com.example.galleryproject.data.Media;
 
 import java.util.LinkedHashMap;
 

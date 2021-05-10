@@ -1,15 +1,15 @@
-package com.example.galleryproject.data;
+package com.example.galleryproject.database;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
-import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.room.TypeConverter;
 import androidx.room.TypeConverters;
-import androidx.sqlite.db.SupportSQLiteDatabase;
+
+import com.example.galleryproject.data.Converter;
+import com.example.galleryproject.entity.CreatedAlbum;
+import com.example.galleryproject.dao.CreatedAlbumDao;
 
 @Database(entities = {CreatedAlbum.class},version = 1)
 @TypeConverters({Converter.class})
@@ -17,7 +17,7 @@ public abstract class CreatedAlbumDatabase extends RoomDatabase {
 
     private static CreatedAlbumDatabase instance;
 
-    public abstract CreatedAlbumDao createdAlbumDao();
+    public abstract CreatedAlbumDao     createdAlbumDao();
 
     public static synchronized  CreatedAlbumDatabase getInstance(Context context){
         if(instance == null) {

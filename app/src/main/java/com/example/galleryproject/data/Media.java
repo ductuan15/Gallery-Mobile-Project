@@ -6,33 +6,32 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.location.Address;
-import android.location.Geocoder;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.exifinterface.media.ExifInterface;
+
+import com.example.galleryproject.entity.FavoriteMedia;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileSystem;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.HashSet;
+
+import static android.os.Environment.*;
 
 public abstract class Media implements Parcelable {
     final Uri uri;
@@ -43,6 +42,24 @@ public abstract class Media implements Parcelable {
     final String fileName;
     final String location;
     final int orientation;
+    boolean isFavorite = false;
+    boolean isTrash = false;
+    int albumIn;
+
+    public static final String SECURE_ALBUM_INTERNAL_DIR_NAME = "secure_album";
+
+    public Media(Uri uri, String size, String date, String resolution, int MEDIA_TYPE, String fileName, String location, int orientation, boolean isFavorite, boolean isTrash) {
+        this.uri = uri;
+        this.size = size;
+        this.date = date;
+        this.resolution = resolution;
+        this.MEDIA_TYPE = MEDIA_TYPE;
+        this.fileName = fileName;
+        this.location = location;
+        this.orientation = orientation;
+        this.isFavorite = isFavorite;
+        this.isTrash = isTrash;
+    }
 
     protected Media(Parcel in) {
         uri = in.readParcelable(Uri.class.getClassLoader());
@@ -53,6 +70,10 @@ public abstract class Media implements Parcelable {
         fileName = in.readString();
         location = in.readString();
         orientation = in.readInt();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            isFavorite = in.readBoolean();
+            isTrash = in.readBoolean();
+        }
     }
 
 
@@ -86,6 +107,10 @@ public abstract class Media implements Parcelable {
         dest.writeString(fileName);
         dest.writeString(location);
         dest.writeInt(orientation);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            dest.writeBoolean(isFavorite);
+            dest.writeBoolean(isTrash);
+        }
     }
 
     @Override
@@ -109,20 +134,25 @@ public abstract class Media implements Parcelable {
         return orientation;
     }
 
-
     public String getDate() {
         return date;
     }
 
-    public Media(Uri mUri, String mSize, String mDate, String resolution, int media_type, String fileName, String location, int orientation) {
-        this.uri = mUri;
-        this.size = mSize;
-        this.date = mDate;
-        this.resolution = resolution;
-        MEDIA_TYPE = media_type;
-        this.fileName = fileName;
-        this.location = location;
-        this.orientation = orientation;
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public int getAlbumIn() {
+        return this.albumIn;
+    }
+
+    public void setAlbumIn(int albumIn) {
+        this.albumIn = albumIn;
+    }
+
+
+    public void changeFavoriteState() {
+        this.isFavorite = !this.isFavorite;
     }
 
 
@@ -141,110 +171,111 @@ public abstract class Media implements Parcelable {
         return -1;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.R)
-    public static void getAllMedia(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList) {
-        // get all pic and vid
-        String[] projection = {
-                MediaStore.MediaColumns.DATA,
-                MediaStore.Files.FileColumns.PARENT,
-                MediaStore.MediaColumns._ID,
-                MediaStore.Files.FileColumns.DISPLAY_NAME,
-                MediaStore.Files.FileColumns.MEDIA_TYPE,
-                MediaStore.MediaColumns.SIZE,
-                MediaStore.MediaColumns.DATE_ADDED,
-                MediaStore.MediaColumns.RESOLUTION,
-                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-                MediaStore.MediaColumns.DURATION,
-                MediaStore.Files.FileColumns.DISC_NUMBER
-        };
-        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-                + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-                + " OR "
-                + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-                + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
-        int column_index_data;
-        @SuppressLint("Recycle") Cursor cursor = context.getApplicationContext().getContentResolver().query(
-                MediaStore.Files.getContentUri("external"),
-                projection,
-                selection,
-                null, // Selection args (none).
-                MediaStore.Files.FileColumns.DATE_ADDED + " DESC" // Sort order.
-        );
+//    @RequiresApi(api = Build.VERSION_CODES.R)
+//    public static void getAllMedia(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList) {
+//        // get all pic and vid
+//        String[] projection = {
+//                MediaStore.MediaColumns.DATA,
+//                MediaStore.Files.FileColumns.PARENT,
+//                MediaStore.MediaColumns._ID,
+//                MediaStore.Files.FileColumns.DISPLAY_NAME,
+//                MediaStore.Files.FileColumns.MEDIA_TYPE,
+//                MediaStore.MediaColumns.SIZE,
+//                MediaStore.MediaColumns.DATE_ADDED,
+//                MediaStore.MediaColumns.RESOLUTION,
+//                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+//                MediaStore.MediaColumns.DURATION,
+//                MediaStore.Files.FileColumns.DISC_NUMBER
+//        };
+//        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+//                + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+//                + " OR "
+//                + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+//                + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+//        int column_index_data;
+//        @SuppressLint("Recycle") Cursor cursor = context.getApplicationContext().getContentResolver().query(
+//                MediaStore.Files.getContentUri("external"),
+//                projection,
+//                selection,
+//                null, // Selection args (none).
+//                MediaStore.Files.FileColumns.DATE_ADDED + " DESC" // Sort order.
+//        );
+//
+//        float[] coordinate;
+//        String location = null;
+//        String absolutePathOfImage;
+//        while (cursor.moveToNext()) {
+//            absolutePathOfImage = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
+//
+//            // get location of media
+//            try {
+//                ExifInterface exifInterface = new ExifInterface(absolutePathOfImage);
+//                coordinate = new float[2];
+//                exifInterface.getLatLong(coordinate);
+//                location = getAddress(coordinate[0], coordinate[1], context);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            // file name
+//            String fileName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
+//            // media type
+//            int mediaType = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE));
+//            // size of media
+//            String size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE));
+//            // data added
+//            String date = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED));
+//            // resolution
+//            String resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RESOLUTION));
+//
+//            long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
+//            //directory of file
+//            String bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME));
+//
+//            int orientation = Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.ORIENTATION)));
+//
+//
+//            Uri contentUri;
+//            Media nextMedia = null;
+//            if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+//                // get duration of video
+//                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
+//
+//                // get thumbnail video
+//                contentUri = ContentUris.withAppendedId(
+//                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
+//
+//                nextMedia = new VideoInfo(contentUri, size, date, resolution, MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO, fileName, location, duration, orientation);
+//                mediaArrayList.add(nextMedia);
+//
+//            } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+//                // get thumbnail img
+//
+//                contentUri = ContentUris.withAppendedId(
+//                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+//
+//                nextMedia = new ImageInfo(contentUri, size, date, resolution, MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO, fileName, location, orientation);
+//                mediaArrayList.add(nextMedia);
+//            }
+//
+//            // check if bucket name is existed
+//            if (bucketName == null) {
+//                bucketName = "0";
+//            }
+//            int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
+//            if (pos == -1) {
+//                defaultAlbumArrayList.add(new DefaultAlbum(absolutePathOfImage, bucketName));
+//                pos = defaultAlbumArrayList.size() - 1;
+//            }
+//            if (defaultAlbumArrayList != null)
+//                defaultAlbumArrayList.get(pos).addMedia(nextMedia);
+//
+//        }
+//    }
 
-        float[] coordinate;
-        String location = null;
-        String absolutePathOfImage;
-        while (cursor.moveToNext()) {
-            absolutePathOfImage = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
-
-            // get location of media
-            try {
-                ExifInterface exifInterface = new ExifInterface(absolutePathOfImage);
-                coordinate = new float[2];
-                exifInterface.getLatLong(coordinate);
-                location = getAddress(coordinate[0], coordinate[1], context);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // file name
-            String fileName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
-            // media type
-            int mediaType = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE));
-            // size of media
-            String size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE));
-            // data added
-            String date = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED));
-            // resolution
-            String resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RESOLUTION));
-
-            long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
-            //directory of file
-            String bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME));
-
-            int orientation = Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.ORIENTATION)));
-
-
-            Uri contentUri;
-            Media nextMedia = null;
-            if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
-                // get duration of video
-                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
-
-                // get thumbnail video
-                contentUri = ContentUris.withAppendedId(
-                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
-
-                nextMedia = new VideoInfo(contentUri, size, date, resolution, MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO, fileName, location, duration, orientation);
-                mediaArrayList.add(nextMedia);
-
-            } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
-                // get thumbnail img
-
-                contentUri = ContentUris.withAppendedId(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                nextMedia = new ImageInfo(contentUri, size, date, resolution, MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO, fileName, location, orientation);
-                mediaArrayList.add(nextMedia);
-            }
-
-            // check if bucket name is existed
-            if (bucketName == null) {
-                bucketName = "0";
-            }
-            int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
-            if (pos == -1) {
-                defaultAlbumArrayList.add(new DefaultAlbum(absolutePathOfImage, bucketName));
-                pos = defaultAlbumArrayList.size() - 1;
-            }
-            if (defaultAlbumArrayList != null)
-                defaultAlbumArrayList.get(pos).addMedia(nextMedia);
-
-        }
-    }
-
+    //TODO: FIX THIS
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public static void getAllMediaUri(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList) {
+    public static void getAllMediaUri(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList, HashSet<String> favoriteMediaHashSet) {
         // get all pic and vid
         String[] projection = {
                 MediaStore.MediaColumns.DATA,
@@ -255,8 +286,6 @@ public abstract class Media implements Parcelable {
                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
                 MediaStore.MediaColumns.DURATION,
                 MediaStore.MediaColumns.ORIENTATION,
-//                MediaStore.Images.ImageColumns.LATITUDE,
-//                MediaStore.Images.ImageColumns.LONGITUD
         };
         String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                 + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -271,9 +300,7 @@ public abstract class Media implements Parcelable {
                 null, // Selection args (none).
                 MediaStore.Files.FileColumns.DATE_ADDED + " DESC" // Sort order.
         );
-//        Uri geoUri;
-//        InputStream stream;
-//        ExifInterface exifInterface;
+
         while (cursor.moveToNext()) {
 
             //TODO: delete this block test
@@ -313,6 +340,10 @@ public abstract class Media implements Parcelable {
             String bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME));
 
             int orientation = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.ORIENTATION));
+
+            boolean isFavorite = false;
+            boolean isTrash = false;
+
             Uri contentUri;
             Media nextMedia;
             if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
@@ -322,14 +353,17 @@ public abstract class Media implements Parcelable {
                 // get thumbnail video
                 contentUri = ContentUris.withAppendedId(
                         MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
-
-                nextMedia = new VideoInfo(contentUri, null, null, null, mediaType, fileName, null, duration, orientation);
+                // check if media is favorite
+                if (favoriteMediaHashSet.contains(contentUri.toString())) {
+                    isFavorite = true;
+                }
+                nextMedia = new VideoInfo(contentUri, null, null, null, mediaType, fileName, null, duration, orientation, isFavorite, isTrash);
                 mediaArrayList.add(nextMedia);
-                addVideoToAlbumList(relavtivePath, bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
+                int albumPos = addVideoToAlbumList(relavtivePath, bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
+                if (albumPos != -1)
+                    nextMedia.setAlbumIn(albumPos);
 
             } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
-                // get thumbnail img
-
                 contentUri = ContentUris.withAppendedId(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
 
@@ -350,44 +384,49 @@ public abstract class Media implements Parcelable {
 //                } catch (IOException e) {
 //                    e.printStackTrace();
 //                }
-                nextMedia = new ImageInfo(contentUri, null, null, null, mediaType, fileName, location, orientation);
+                if (favoriteMediaHashSet.contains(contentUri.toString())) {
+                    isFavorite = true;
+                }
+                nextMedia = new ImageInfo(contentUri, null, null, null, mediaType, fileName, location, orientation, isFavorite, isTrash);
                 mediaArrayList.add(nextMedia);
-                addImageToAlbumList(relavtivePath, bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
+                int albumPos = addImageToAlbumList(relavtivePath, bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
+                if (albumPos != -1)
+                    nextMedia.setAlbumIn(albumPos);
             }
         }
         cursor.close();
     }
 
 
-    public static String getAddress(double lat, double lng, Context context) {
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            if (addresses.size() != 0) {
-                Address obj = addresses.get(0);
-                String add = obj.getAddressLine(0);
-                add = add + "\n" + obj.getCountryName();
-                add = add + "\n" + obj.getCountryCode();
-                add = add + "\n" + obj.getAdminArea();
-//                add = add + "\n" + obj.getPostalCode();
-//                add = add + "\n" + obj.getSubAdminArea();
-//                add = add + "\n" + obj.getLocality();
-//                add = add + "\n" + obj.getSubThoroughfare();
-                return add;
-            }
+//    public static String getAddress(double lat, double lng, Context context) {
+//        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+//        try {
+//            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+//            if (addresses.size() != 0) {
+//                Address obj = addresses.get(0);
+//                String add = obj.getAddressLine(0);
+//                add = add + "\n" + obj.getCountryName();
+//                add = add + "\n" + obj.getCountryCode();
+//                add = add + "\n" + obj.getAdminArea();
+////                add = add + "\n" + obj.getPostalCode();
+////                add = add + "\n" + obj.getSubAdminArea();
+////                add = add + "\n" + obj.getLocality();
+////                add = add + "\n" + obj.getSubThoroughfare();
+//                return add;
+//            }
+//
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private static void addImageToAlbumList(String albumPath, String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, ImageInfo nextMedia) {
+    private static int addImageToAlbumList(String albumPath, String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, ImageInfo nextMedia) {
 
         // check if bucket name is existed
         if (defaultAlbumArrayList == null) {
-            return;
+            return -1;
         }
         if (bucketName == null) {
             bucketName = "0";
@@ -399,14 +438,16 @@ public abstract class Media implements Parcelable {
         }
 
         defaultAlbumArrayList.get(pos).addImageInfo(nextMedia);
+        return pos;
     }
 
-    private static void addVideoToAlbumList(String albumPath, String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, VideoInfo nextMedia) {
+    private static int addVideoToAlbumList(String albumPath, String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, VideoInfo nextMedia) {
 
-        // check if bucket name is existed
+        // check if defaultAlbumArrayList = null
         if (defaultAlbumArrayList == null) {
-            return;
+            return -1;
         }
+        // check if bucket name is null (root dir)
         if (bucketName == null) {
             bucketName = "0";
         }
@@ -417,6 +458,7 @@ public abstract class Media implements Parcelable {
         }
 
         defaultAlbumArrayList.get(pos).addVideoInfo(nextMedia);
+        return pos;
     }
 
 
@@ -432,37 +474,99 @@ public abstract class Media implements Parcelable {
         return null;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    public static boolean copyFile(Uri media, String fileName,String albumName, ContentResolver resolver) {
-        InputStream a = null;
-        String albumPath = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + albumName +  File.separator ;
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static int copyFile(Media media, String folderPath, Context context) {
+        InputStream a;
         try {
-            a = resolver.openInputStream(media);
-            Path path = FileSystems.getDefault().getPath( albumPath + fileName);
-
-            Uri audioCollection;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                audioCollection = MediaStore.Images.Media
-                        .getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-            } else {
-                audioCollection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            a = context.getContentResolver().openInputStream(media.getUri());
+            Path path = FileSystems.getDefault().getPath(String.valueOf(getExternalStorageDirectory()), folderPath, media.getFileName());
+            if (Files.exists(path)) {
+                return 2;
             }
-            ContentValues newSongDetails = new ContentValues();
-            newSongDetails.put(MediaStore.MediaColumns.RELATIVE_PATH,
-                    Environment.DIRECTORY_DCIM + File.separator + albumName);
-            newSongDetails.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
-
-            newSongDetails.put(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME, "albumName");
-
-            Uri myFavoriteSongUri = resolver.insert(audioCollection, newSongDetails);
             Files.copy(a, path);
-            Log.e("Tag", myFavoriteSongUri.getPath());
-            return true;
+            String absolutePath = getExternalStorageDirectory() + File.separator + folderPath + File.separator + media.getFileName();
+            MediaScannerConnection.scanFile(context, new String[]{absolutePath}, null, null);
+            return 1;
+        } catch (IOException ioException) {
+            Log.e("TAG", ioException.getMessage());
+            ;
+            return 0;
         }
-        catch (IOException ioException) {
-            ioException.printStackTrace();
-            return false;
-        }
-
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static int moveFile(Media media, DefaultAlbum des, DefaultAlbum src, Context content) {
+        Path desPath = FileSystems.getDefault().getPath(String.valueOf(getExternalStorageDirectory()), des.albumPath, media.getFileName());
+        Path srcPath = FileSystems.getDefault().getPath(String.valueOf(getExternalStorageDirectory()), src.albumPath, media.getFileName());
+        try {
+            Files.move(srcPath, desPath);
+            String filePath = getExternalStorageDirectory() + File.separator + des.getAlbumPath() + File.separator + media.getFileName();
+            MediaScannerConnection.scanFile(content, new String[]{filePath}, null, null);
+            content.getContentResolver().delete(
+                    media.getUri(),
+                    null,
+                    null);
+        } catch (FileAlreadyExistsException e) {
+            Log.e("", e.toString());
+            return 2;
+        } catch (IOException e) {
+            Log.e("", e.toString());
+            return 0;
+        }
+        return 1;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void moveToSecureAlbum(Media srcMedia, Context context) {
+        String srcPathStr = Media.getFilePath(srcMedia.getUri(),context.getContentResolver());
+        Path srcPath = FileSystems.getDefault().getPath(srcPathStr);
+        Path desPath = FileSystems.getDefault().getPath(String.valueOf(context.getFilesDir()),Media.SECURE_ALBUM_INTERNAL_DIR_NAME ,srcMedia.fileName);
+        String folderPath = context.getFilesDir() + File.separator + Media.SECURE_ALBUM_INTERNAL_DIR_NAME;
+        File folder = new File(folderPath);
+        boolean success = true;
+        if (!folder.exists()) {
+            success = folder.mkdirs();
+        }
+        if(success){
+            try {
+                Files.copy(srcPath, desPath);
+            } catch (IOException e) {
+                Log.e("TAG", e.getMessage());
+            }
+        }
+    }
+    public static String getFilePath(Uri mediaUri, ContentResolver contentResolver){
+        String result;
+        Cursor cursor = contentResolver.query(mediaUri, null, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            return null;
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
+    }
+
+    public static Uri getUriMediaCollection(int mediaType) {
+        Uri mediaCollection = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                mediaCollection = MediaStore.Images.Media
+                        .getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+            } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                mediaCollection = MediaStore.Video.Media
+                        .getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+            }
+        } else {
+            if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                mediaCollection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                mediaCollection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+            }
+        }
+        return mediaCollection;
+    }
+
 }

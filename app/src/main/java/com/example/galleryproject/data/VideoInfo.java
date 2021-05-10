@@ -4,13 +4,15 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.jetbrains.annotations.NotNull;
+
 public class VideoInfo extends Media implements Parcelable {
 
 
     final int duration;
 
-    public VideoInfo(Uri uri, String size, String date, String resolution, int media_type, String fileName, String location,int duration,int orientation) {
-        super(uri, size, date, resolution, media_type, fileName, location, orientation);
+    public VideoInfo(Uri uri, String size, String date, String resolution, int media_type, String fileName, String location,int duration,int orientation,boolean isFavorite, boolean isTrash) {
+        super(uri, size, date, resolution, media_type, fileName, location, orientation,isFavorite,isTrash);
         this.duration = duration;
     }
 
@@ -56,6 +58,7 @@ public class VideoInfo extends Media implements Parcelable {
         this.duration = duration;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return this.uri.toString() +
@@ -74,10 +77,16 @@ public class VideoInfo extends Media implements Parcelable {
                 "|" +
                 this.duration +
                 "|" +
-                this.orientation;
+                this.orientation +
+                "|" +
+                this.isFavorite +
+                "|" +
+                this.isTrash +
+                "|" +
+                this.albumIn;
     }
 
-    public static VideoInfo parseString(String datas[]){
+    public static VideoInfo parseString(String[] datas){
         Uri uri = Uri.parse(datas[0]);
         String size = datas[1];
         String date = datas[2];
@@ -87,7 +96,12 @@ public class VideoInfo extends Media implements Parcelable {
         String location = datas[6];
         int duration = Integer.parseInt(datas[8]);
         int orientation = Integer.parseInt(datas[8]);
-        return new VideoInfo(uri,size,date,resolution,mediaType,fileName,location,duration,orientation);
+
+        boolean isFavorite = Boolean.parseBoolean(datas[8]);
+        boolean isTrash = Boolean.parseBoolean(datas[9]);
+        int inAlbum = Integer.parseInt(datas[10]);
+
+        return new VideoInfo(uri,size,date,resolution,mediaType,fileName,location,duration,orientation,isFavorite,isTrash);
     }
 
 

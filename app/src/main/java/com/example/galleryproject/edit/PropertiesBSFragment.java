@@ -1,4 +1,4 @@
-package com.example.galleryproject;
+package com.example.galleryproject.edit;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.galleryproject.R;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 public class PropertiesBSFragment extends BottomSheetDialogFragment implements SeekBar.OnSeekBarChangeListener {
@@ -59,6 +60,7 @@ public class PropertiesBSFragment extends BottomSheetDialogFragment implements S
                 if (mProperties != null) {
                     dismiss();
                     mProperties.onColorChanged(colorCode);
+
                 }
             }
         });

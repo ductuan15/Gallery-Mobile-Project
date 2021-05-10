@@ -2,6 +2,7 @@ package com.example.galleryproject.data;
 
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -10,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.room.Entity;
 
+import java.io.File;
 import java.util.ArrayList;
 
 @Entity
@@ -17,6 +19,9 @@ public class DefaultAlbum implements Parcelable{
     ArrayList<Media> mediaArrayList = new ArrayList<>();
     String albumPath;
     String albumName;
+    public static String DEFAULT_RELATIVE_ALBUM_PATH = Environment.DIRECTORY_DCIM + File.separator;
+    public static String DEFAULT_ABSOLUTE_ALBUM_PATH = Environment.getExternalStorageDirectory() + File.separator  + Environment.DIRECTORY_DCIM + File.separator ;
+    public static String EXTERNAL_STORAGE_DIR = Environment.getExternalStorageDirectory() + File.separator;
 
     protected DefaultAlbum(Parcel in) {
         mediaArrayList = in.createTypedArrayList(Media.CREATOR);
@@ -92,6 +97,9 @@ public class DefaultAlbum implements Parcelable{
     public String getAlbumPath() {return albumPath;}
 
     public Uri getUriThumbnail() {
+        if(this.mediaArrayList.size() < 1){
+            return null;
+        }
         return this.mediaArrayList.get(0).getUri();
     }
 

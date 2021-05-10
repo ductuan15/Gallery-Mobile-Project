@@ -1,6 +1,7 @@
 package com.example.galleryproject;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,13 +60,25 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     public void onBindViewHolder(@NonNull ThumbnailAlbumViewHolder holder, int position) {
         DefaultAlbum defaultAlbum = this.defaultAlbumArrayList.get(position);
         // TODO:replace the image that we need
-        Glide.with(this.context)
-                .load(defaultAlbum.getUriThumbnail())
-                .placeholder(R.drawable.ic_noun_cat_search_232263)
-                .error(R.drawable.ic_noun_cat_search_232263)
-                .centerCrop()
-                .fitCenter()
-                .into(holder.imageView);
+        Uri thumbnailUri = defaultAlbum.getUriThumbnail();
+        if(thumbnailUri != null){
+            Glide.with(this.context)
+                    .load(defaultAlbum.getUriThumbnail())
+                    .placeholder(R.drawable.ic_noun_cat_search_232263)
+                    .error(R.drawable.ic_noun_cat_search_232263)
+                    .centerCrop()
+                    .fitCenter()
+                    .into(holder.imageView);
+        }
+        else{
+            Glide.with(this.context)
+                    .load(R.drawable.ic_noun_cat_search_232263)
+                    .placeholder(R.drawable.ic_noun_cat_search_232263)
+                    .error(R.drawable.ic_noun_cat_search_232263)
+                    .centerCrop()
+                    .fitCenter()
+                    .into(holder.imageView);
+        }
         // TODO: replace by the name of albums
         holder.albumNameTextView.setText(defaultAlbum.getAlbumName());
     }

@@ -40,9 +40,10 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
         final ImageView imageView;
         final Chip videoDurationChip;
         final CheckBox selectCheckBox;
+        final ImageView isFavoriteIcon;
         final AdapterView.OnClickListener onItemClickListener;
 
-        public ThumbnailPictureViewHolder(@NonNull View itemView, int mediaType, AdapterView.OnClickListener onItemClickListener, boolean isSelectMode) {
+        public ThumbnailPictureViewHolder(@NonNull View itemView, int mediaType, AdapterView.OnClickListener onItemClickListener) {
             super(itemView);
             this.onItemClickListener = onItemClickListener;
 
@@ -54,6 +55,7 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
                 videoDurationChip = null;
             }
             this.selectCheckBox = itemView.findViewById(R.id.checkBox);
+            this.isFavoriteIcon = itemView.findViewById(R.id.is_favorite_imageView);
             this.imageView.setTag(this);
             this.imageView.setOnClickListener(this.onItemClickListener);
         }
@@ -71,9 +73,6 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
             this.selectCheckBox.setChecked(!this.selectCheckBox.isChecked());
         }
 
-        public boolean isSelected() {
-            return this.selectCheckBox.isChecked();
-        }
     }
 
     public ThumbnailPictureAdapter(ArrayList<Media> mediaArrayList, Context context, SelectionTracker<Long> selectionTracker, View.OnClickListener onItemClickListener) {
@@ -97,7 +96,7 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_video, parent, false);
         else
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_pic, parent, false);
-        return new ThumbnailPictureViewHolder(view, viewType, this.onItemClickListener, isMultiSelectMode);
+        return new ThumbnailPictureViewHolder(view, viewType, this.onItemClickListener);
     }
 
     @Override
@@ -134,6 +133,12 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
                     .centerCrop()
                     .fitCenter()
                     .into(holder.imageView);
+        }
+        if(mediaArrayList.get(position).isFavorite()) {
+            holder.isFavoriteIcon.setVisibility(View.VISIBLE);
+        }
+        else{
+            holder.isFavoriteIcon.setVisibility(View.INVISIBLE);
         }
         boolean isSelected = false;
         if(selectionTracker != null){

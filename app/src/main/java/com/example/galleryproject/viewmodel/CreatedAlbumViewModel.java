@@ -1,13 +1,15 @@
-package com.example.galleryproject.data;
+package com.example.galleryproject.viewmodel;
 
 import android.app.Application;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.example.galleryproject.entity.CreatedAlbum;
+import com.example.galleryproject.repository.CreatedAlbumRepository;
+
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CreatedAlbumViewModel  extends AndroidViewModel {
