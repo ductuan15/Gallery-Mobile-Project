@@ -1,32 +1,26 @@
 package com.example.galleryproject;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.transition.ChangeBounds;
-import androidx.transition.TransitionManager;
-
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.ChangeBounds;
+import androidx.transition.TransitionManager;
 
 import com.example.galleryproject.edit.EmojiBSFragment;
 import com.example.galleryproject.edit.FileSaveHelper;
@@ -36,8 +30,6 @@ import com.example.galleryproject.edit.filters.FilterListener;
 import com.example.galleryproject.edit.filters.FilterViewAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.theartofdev.edmodo.cropper.CropImage;
-
-import java.io.IOException;
 
 import ja.burhanrashid52.photoeditor.PhotoEditor;
 import ja.burhanrashid52.photoeditor.PhotoEditorView;
