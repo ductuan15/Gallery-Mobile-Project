@@ -49,10 +49,10 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
     boolean isNavigateVisible = true;
     SlideMediaAdapter slideMediaAdapter;
 
+
     public HashSet<String> favoriteMediaHashSet = new HashSet<>();
     SharedPreferences favoriteSharedPreferences;
-    SharedPreferences.Editor editor;
-
+    SharedPreferences.Editor favoriteEditor;
 
     @SuppressLint("UseCompatLoadingForDrawables")
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -60,27 +60,21 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide_media);
-        favoriteSharedPreferences = getSharedPreferences(MainActivity.FAVORITE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        editor = favoriteSharedPreferences.edit();
-        editor.apply();
 
-        // get all favorite album
-        favoriteMediaHashSet.clear();
-        Map<String,?> favoriteMediaMap = favoriteSharedPreferences.getAll();
-        for(Map.Entry<String,?> entry : favoriteMediaMap.entrySet()) {
-            favoriteMediaHashSet.add(entry.getKey());
-        }
-
+        // get shared preferences
+        favoriteSharedPreferences = SharePreferenceHandler.getFavoriteSharePreferences(this);
+        favoriteEditor = favoriteSharedPreferences.edit();
+        favoriteEditor.apply();
+        SharePreferenceHandler.getAllDataFromSharedPreference(favoriteSharedPreferences,favoriteMediaHashSet);
 
         this.actionBar = getSupportActionBar();
         this.buttonLayout = findViewById(R.id.button_layout);
-
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
         // get all media
-        Media.getAllMediaUri(this, mediaArrayList, null,favoriteMediaHashSet);
+        Media.getAllMediaUri(this, mediaArrayList, null, favoriteMediaHashSet);
 
 
         //change color for actionbar
@@ -145,17 +139,16 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
             Media mediaSelected = mediaArrayList.get(pos);
             try {
                 mediaSelected.changeFavoriteState();
-                if(mediaArrayList.get(pos).isFavorite()){
-                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24,getTheme()));
-                    if(!favoriteMediaHashSet.contains(mediaSelected.getUri().toString()));
-                        editor.putString(mediaSelected.getUri().toString(),"");
+                if (mediaArrayList.get(pos).isFavorite()) {
+                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24, getTheme()));
+                    if (!favoriteMediaHashSet.contains(mediaSelected.getUri().toString())) ;
+                    favoriteEditor.putString(mediaSelected.getUri().toString(), "");
+                } else {
+                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24, getTheme()));
+                    if (favoriteMediaHashSet.contains(mediaSelected.getUri().toString())) ;
+                        favoriteEditor.remove(mediaSelected.getUri().toString());
                 }
-                else{
-                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24,getTheme()));
-                    if(favoriteMediaHashSet.contains(mediaSelected.getUri().toString()));
-                        editor.remove(mediaSelected.getUri().toString());
-                }
-                editor.apply();
+                favoriteEditor.apply();
             } catch (Exception e) {
                 Log.e("", e.getMessage());
             }
@@ -168,17 +161,17 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
         this.viewPager.setAdapter(pagerAdapter);
         int curPos = bundle.getInt("imgPos");
         this.viewPager.setCurrentItem(curPos);
-        if(mediaArrayList.get(curPos).isFavorite()){
-            favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24,getTheme()));
+        if (mediaArrayList.get(curPos).isFavorite()) {
+            favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24, getTheme()));
         }
         this.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                if(mediaArrayList.get(position).isFavorite())
-                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24,getTheme()));
+                if (mediaArrayList.get(position).isFavorite())
+                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24, getTheme()));
                 else
-                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24,getTheme()));
+                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24, getTheme()));
             }
         });
     }
@@ -192,10 +185,11 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
             case R.id.add_location_tag_opt:
 
                 return true;
+            // move media to secure album
             case R.id.lock_picture:
                 int curPos = viewPager.getCurrentItem();
                 Media srcMedia = mediaArrayList.get(curPos);
-                Media.moveToSecureAlbum(srcMedia,this);
+                int res = FileHandler.moveToSecureAlbum(srcMedia, this);
                 return true;
             case R.id.detail_button:
 

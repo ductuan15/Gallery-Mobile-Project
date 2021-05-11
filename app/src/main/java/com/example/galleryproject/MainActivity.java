@@ -58,8 +58,6 @@ public class MainActivity extends AppCompatActivity {
     Locale myLocale;
     String currentLang;                 //key intent
     SharedPreferences languagePreferences;
-    boolean gettedData = false;
-    public static final String FAVORITE_SHARED_PREFERENCES= "favorite_file_shared_preferences";
     SharedPreferences favoriteSharedPreferences;
 
     public ArrayList<Media> mediaArrayList = new ArrayList<>();
@@ -76,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         setLocale(currentLanguage);
 
         // get all favorite media
-       favoriteSharedPreferences = getSharedPreferences(FAVORITE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+       favoriteSharedPreferences = SharePreferenceHandler.getFavoriteSharePreferences(this);
 
 
 
@@ -128,11 +126,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // get all favorite media
-        favoriteMediaHashSet.clear();
-        Map<String,?> favoriteMediaMap = favoriteSharedPreferences.getAll();
-        for(Map.Entry<String,?> entry : favoriteMediaMap.entrySet()) {
-            favoriteMediaHashSet.add(entry.getKey());
-        }
+        SharePreferenceHandler.getAllDataFromSharedPreference(favoriteSharedPreferences,favoriteMediaHashSet);
         // get all data need to run app
         getAllDataSet();
     }
@@ -233,13 +227,15 @@ public class MainActivity extends AppCompatActivity {
             case R.id.gotocam:
                 dispatchTakePictureIntent();
                 return true;
+            case R.id.go_to_secure_album:
+                Intent intent = new Intent(this,SecureAlbumActivity.class);
+                startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     public void setLocale(String localeName) {                                                      //set locale of current locale
-//        if (!localeName.equals(currentLanguage)) {
         Locale myLocale = new Locale(localeName);
         Resources res = getResources();                                                         //get resource of app
         DisplayMetrics dm = res.getDisplayMetrics();

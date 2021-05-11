@@ -29,7 +29,6 @@ import kotlinx.coroutines.selects.SelectBuilder;
 public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictureAdapter.ThumbnailPictureViewHolder> {
     private ArrayList<Media> mediaArrayList;
     private final Context context;
-    private boolean isMultiSelectMode;
     private SelectionTracker<Long> selectionTracker;
 
     // this interface will listen to click
@@ -56,8 +55,8 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
             }
             this.selectCheckBox = itemView.findViewById(R.id.checkBox);
             this.isFavoriteIcon = itemView.findViewById(R.id.is_favorite_imageView);
-            this.imageView.setTag(this);
-            this.imageView.setOnClickListener(this.onItemClickListener);
+            itemView.setTag(this);
+            itemView.setOnClickListener(this.onItemClickListener);
         }
 
         public void setIsSelectMode(boolean isSelectMode) {
@@ -172,15 +171,9 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
         return (long) pos;
     }
 
-    public boolean isMultiSelectMode() {
-        return this.isMultiSelectMode;
-    }
 
     public void notifyDataChange() {
         this.notifyDataSetChanged();
     }
 
-    public void setMultiSelectMode(boolean isMultiSelectMode) {
-        this.isMultiSelectMode = isMultiSelectMode;
-    }
 }

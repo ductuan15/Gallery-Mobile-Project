@@ -134,9 +134,9 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
                 Media media = this.mediaArrayList.get(i);
                 int actionStatus;
                 if (this.actionMode == AlbumSelectDialogFragment.COPY_TO_ALBUM_MODE) {
-                    actionStatus = Media.copyFile(media,this.defaultAlbumArrayList.get(pos).getAlbumPath(), requireActivity());
+                    actionStatus = FileHandler.copyFile(media,this.defaultAlbumArrayList.get(pos).getAlbumPath(), requireActivity());
                 } else {
-                    actionStatus = Media.moveFile(media, defaultAlbumArrayList.get(pos), defaultAlbumArrayList.get(media.getAlbumIn()), requireActivity());
+                    actionStatus = FileHandler.moveFile(media, defaultAlbumArrayList.get(pos), defaultAlbumArrayList.get(media.getAlbumIn()), requireActivity());
                 }
                 if (actionStatus == 0) {
                     Toast.makeText(requireActivity(), "Failed", Toast.LENGTH_LONG).show();
