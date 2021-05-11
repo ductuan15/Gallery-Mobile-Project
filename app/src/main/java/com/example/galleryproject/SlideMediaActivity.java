@@ -1,74 +1,87 @@
 package com.example.galleryproject;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Size;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.galleryproject.data.DefaultAlbum;
 import com.example.galleryproject.data.Media;
+import com.example.galleryproject.entity.FavoriteMedia;
+import com.example.galleryproject.viewmodel.FavoriteMediaViewModel;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
+
 public class SlideMediaActivity extends AppCompatActivity implements View.OnClickListener {
     ViewPager2 viewPager;
     ArrayList<Media> mediaArrayList = new ArrayList<>();
-    ImageButton shareBtn, deleteBtn, editBtn;
+    ImageButton shareBtn, deleteBtn, editBtn, favoriteBtn;
     LinearLayout buttonLayout;
     ActionBar actionBar;
     boolean isNavigateVisible = true;
     SlideMediaAdapter slideMediaAdapter;
 
+    public HashSet<String> favoriteMediaHashSet = new HashSet<>();
+    SharedPreferences favoriteSharedPreferences;
+    SharedPreferences.Editor editor;
 
+
+    @SuppressLint("UseCompatLoadingForDrawables")
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide_media);
+        favoriteSharedPreferences = getSharedPreferences(MainActivity.FAVORITE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        editor = favoriteSharedPreferences.edit();
+        editor.apply();
+
+        // get all favorite album
+        favoriteMediaHashSet.clear();
+        Map<String,?> favoriteMediaMap = favoriteSharedPreferences.getAll();
+        for(Map.Entry<String,?> entry : favoriteMediaMap.entrySet()) {
+            favoriteMediaHashSet.add(entry.getKey());
+        }
+
+
         this.actionBar = getSupportActionBar();
         this.buttonLayout = findViewById(R.id.button_layout);
 
+
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        bundle.getInt("imgPos");
-        this.viewPager = findViewById(R.id.media_viewpager);
 
         // get all media
-        Media.getAllMediaUri(this, mediaArrayList, null);
+        Media.getAllMediaUri(this, mediaArrayList, null,favoriteMediaHashSet);
 
-        // set ip adapter
-        this.slideMediaAdapter = new SlideMediaAdapter(this, this);
-        FragmentStateAdapter pagerAdapter = new SlideMediaAdapter(this, this);
-        this.viewPager.setAdapter(pagerAdapter);
-        this.viewPager.setCurrentItem(bundle.getInt("imgPos"));
 
         //change color for actionbar
         ColorDrawable colorDrawable;
@@ -126,14 +139,52 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
             editIntent.putExtras(data);
             startActivity(editIntent);
         });
+        favoriteBtn = findViewById(R.id.favorite_button);
+        favoriteBtn.setOnClickListener(v -> {
+            int pos = viewPager.getCurrentItem();
+            Media mediaSelected = mediaArrayList.get(pos);
+            try {
+                mediaSelected.changeFavoriteState();
+                if(mediaArrayList.get(pos).isFavorite()){
+                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24,getTheme()));
+                    if(!favoriteMediaHashSet.contains(mediaSelected.getUri().toString()));
+                        editor.putString(mediaSelected.getUri().toString(),"");
+                }
+                else{
+                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24,getTheme()));
+                    if(favoriteMediaHashSet.contains(mediaSelected.getUri().toString()));
+                        editor.remove(mediaSelected.getUri().toString());
+                }
+                editor.apply();
+            } catch (Exception e) {
+                Log.e("", e.getMessage());
+            }
+
+        });
+        // set pager adapter
+        this.slideMediaAdapter = new SlideMediaAdapter(this, this);
+        FragmentStateAdapter pagerAdapter = new SlideMediaAdapter(this, this);
+        this.viewPager = findViewById(R.id.media_viewpager);
+        this.viewPager.setAdapter(pagerAdapter);
+        int curPos = bundle.getInt("imgPos");
+        this.viewPager.setCurrentItem(curPos);
+        if(mediaArrayList.get(curPos).isFavorite()){
+            favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24,getTheme()));
+        }
+        this.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if(mediaArrayList.get(position).isFavorite())
+                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24,getTheme()));
+                else
+                    favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24,getTheme()));
+            }
+        });
     }
 
-//    @Override
-//    protected void onResumeFragments() {
-//        super.onResumeFragments();
-//    }
 
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -142,7 +193,9 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
 
                 return true;
             case R.id.lock_picture:
-
+                int curPos = viewPager.getCurrentItem();
+                Media srcMedia = mediaArrayList.get(curPos);
+                Media.moveToSecureAlbum(srcMedia,this);
                 return true;
             case R.id.detail_button:
 
@@ -193,9 +246,5 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
             }
         }
     }
-
-
-
-
 }
 

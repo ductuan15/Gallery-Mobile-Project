@@ -1,6 +1,9 @@
 package com.example.galleryproject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StableIdKeyProvider;
+import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +14,7 @@ import android.widget.AdapterView;
 
 import com.example.galleryproject.data.DefaultAlbum;
 import com.example.galleryproject.data.Media;
+import com.example.galleryproject.ui.DetailsLookup;
 
 import java.util.ArrayList;
 
@@ -21,6 +25,7 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
     RecyclerView listViewAllAlbum;
     RecyclerView gridViewAllMedia;
     ThumbnailPictureAdapter thumbnailPictureAdapter;
+    SelectionTracker<Long> selectionTracker;
     int albumSelectedPos = 0;
 
     @Override
@@ -52,7 +57,14 @@ public class AlbumViewActivity extends AppCompatActivity implements View.OnClick
         this.mediaArrayList = this.defaultAlbumArrayList.get(this.albumSelectedPos).getMediaArrayList();
 
         //set up  recycleView
-        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaArrayList, this, this, this);
+//        StableIdKeyProvider keyProvider = new StableIdKeyProvider(this.gridViewAllMedia);
+//        selectionTracker = new SelectionTracker.Builder<>(
+//                "media_select",
+//                this.gridViewAllMedia,
+//                keyProvider,
+//                new DetailsLookup(this.gridViewAllMedia),
+//                StorageStrategy.createLongStorage()).build();
+        this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaArrayList,this, selectionTracker, this);
         this.gridViewAllMedia = findViewById(R.id.grid_view_thumbnail_media);
         this.gridViewAllMedia.setAdapter(thumbnailPictureAdapter);
         this.gridViewAllMedia.setLayoutManager(new GridLayoutManager(this, 3));

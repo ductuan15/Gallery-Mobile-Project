@@ -1,4 +1,4 @@
-package com.example.galleryproject.data;
+package com.example.galleryproject.entity;
 
 import android.net.Uri;
 
@@ -6,12 +6,13 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-import org.jetbrains.annotations.NotNull;
+import com.example.galleryproject.data.Converter;
+import com.example.galleryproject.data.Media;
 
 import java.util.LinkedHashMap;
 
 @Entity(tableName = "create_album")
-public class    CreatedAlbum {
+public class CreatedAlbum {
     @PrimaryKey(autoGenerate = true)
     private int id;
 
@@ -60,7 +61,4 @@ public class    CreatedAlbum {
     public void setLocked(boolean locked) {
         isLocked = locked;
     }
-
-
-
 }

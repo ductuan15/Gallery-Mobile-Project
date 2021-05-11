@@ -299,5 +299,3 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
         }
     }
 }
-
-

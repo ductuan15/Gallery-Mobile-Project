@@ -2,6 +2,7 @@ package com.example.galleryproject;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,7 +12,9 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -28,58 +31,60 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.preference.PreferenceManager;
 
-import com.example.galleryproject.data.CreatedAlbum;
-import com.example.galleryproject.data.CreatedAlbumViewModel;
 import com.example.galleryproject.data.DefaultAlbum;
 import com.example.galleryproject.data.Media;
 import com.example.galleryproject.ui.allpic.AllPicFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private final int REQUEST_READ_EXTERNAL_STORAGE_CODE = 1;
     static final int REQUEST_IMAGE_CAPTURE = 2;
+    private final int REQUEST_MANAGE_EXTERNAL_STORAGE_CODE = 3;
     String currentLanguage = "en";       //value
     String currentTheme = "Light";
     Locale myLocale;
     String currentLang;                 //key intent
-    SharedPreferences preferences;
+    SharedPreferences languagePreferences;
     boolean gettedData = false;
-
+    public static final String FAVORITE_SHARED_PREFERENCES= "favorite_file_shared_preferences";
+    SharedPreferences favoriteSharedPreferences;
 
     public ArrayList<Media> mediaArrayList = new ArrayList<>();
     public ArrayList<DefaultAlbum> defaultAlbumArrayList = new ArrayList<>();
-    public ArrayList<CreatedAlbum> createdAlbumArrayList =  new ArrayList<>();
-
-
-    public CreatedAlbumViewModel createdAlbumViewModel;
+    public HashSet<String> favoriteMediaHashSet = new HashSet<>();
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        currentLanguage = preferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
+        languagePreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        currentLanguage = languagePreferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
         setLocale(currentLanguage);
+
+        // get all favorite media
+       favoriteSharedPreferences = getSharedPreferences(FAVORITE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+
+
+
 
         ActionBar actionBar = getSupportActionBar();                                                            //change color for actionbar
         ColorDrawable colorDrawable;
 
-        currentTheme = preferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference theme
+        currentTheme = languagePreferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference theme
         switch (currentTheme) {
             case "Light": {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -89,10 +94,13 @@ public class MainActivity extends AppCompatActivity {
             case "Dark": {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 colorDrawable = new ColorDrawable(Color.parseColor("#0F9D58"));
-                actionBar.setBackgroundDrawable(colorDrawable);
+                if (actionBar != null) {
+                    actionBar.setBackgroundDrawable(colorDrawable);
+                }
                 break;
             }
         }
+
 
         setContentView(R.layout.activity_main);
 
@@ -108,15 +116,6 @@ public class MainActivity extends AppCompatActivity {
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-
-
-//        this.createdAlbumViewModel = new ViewModelProvider(this).get(CreatedAlbumViewModel.class);
-//        this.createdAlbumViewModel.getAllCreatedAlbum().observe(this, new Observer<List<CreatedAlbum>>() {
-//            @Override
-//            public void onChanged(List<CreatedAlbum> createdAlbums) {
-//
-//            }
-//        });
         //request for all permission
         askingForPermission();
 
@@ -128,20 +127,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // get all favorite media
+        favoriteMediaHashSet.clear();
+        Map<String,?> favoriteMediaMap = favoriteSharedPreferences.getAll();
+        for(Map.Entry<String,?> entry : favoriteMediaMap.entrySet()) {
+            favoriteMediaHashSet.add(entry.getKey());
+        }
         // get all data need to run app
         getAllDataSet();
-//        Runnable runnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                getAllDataSet();
-//                try {
-//                    Thread.sleep(10000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        };
-//        new Thread(runnable).start();
     }
 
 
@@ -166,18 +159,32 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private void askingForPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Permission needed")
-                        .setMessage("This permission must have to run app")
-                        .setPositiveButton("OK", (dialog, which) -> requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE))
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create().show();
-            } else {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                Intent askPermission = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                try {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission needed")
+                            .setMessage("The app need manage all file permission to run perfectly")
+                            .setPositiveButton("OK", (dialog, which) -> startActivityForResult(askPermission, REQUEST_IMAGE_CAPTURE))
+                            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create().show();
+                } catch (IllegalAccessError e) {
+                    Log.e("", "askingForPermission: ");
+                }
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission needed")
+                            .setMessage("This permission must have to run app")
+                            .setPositiveButton("OK", (dialog, which) -> requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE_CODE))
+                            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create().show();
+                } else {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION}, REQUEST_READ_EXTERNAL_STORAGE_CODE);
+                }
             }
         }
-
     }
 
     @Override
@@ -189,6 +196,14 @@ public class MainActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED
                         && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case REQUEST_MANAGE_EXTERNAL_STORAGE_CODE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
@@ -245,11 +260,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.R)
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     public void getAllDataSet() {
         this.mediaArrayList.clear();
         this.defaultAlbumArrayList.clear();
-        Media.getAllMediaUri(this, this.mediaArrayList, this.defaultAlbumArrayList);
+        Media.getAllMediaUri(this, this.mediaArrayList, this.defaultAlbumArrayList,this.favoriteMediaHashSet);
         Log.e("", "getAllDataSet: ");
     }
 }
