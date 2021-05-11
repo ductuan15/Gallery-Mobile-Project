@@ -27,7 +27,7 @@
         android:roundIcon="@mipmap/game_lauchericon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GalleryProject">
-        <activity android:name=".SecureAlbumActivity"></activity>
+        <activity android:name=".SecureAlbumActivity" />
         <activity android:name=".VideoPlayActivity" />
         <activity android:name=".AlbumViewActivity" />
         <activity
