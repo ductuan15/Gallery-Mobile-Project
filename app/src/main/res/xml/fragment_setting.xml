@@ -14,9 +14,6 @@
         android:entryValues="@array/Theme"
         android:key="@string/theme_key"
         android:title="@string/title_change_Theme" />
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="set_default_app"
-        android:title="@string/title_set_default_app" />
+
 
 </androidx.preference.PreferenceScreen>
