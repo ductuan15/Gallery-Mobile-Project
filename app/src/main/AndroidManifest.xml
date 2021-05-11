@@ -14,7 +14,7 @@
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:remove="android:maxSdkVersion" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
@@ -27,7 +27,8 @@
         android:roundIcon="@mipmap/game_lauchericon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GalleryProject">
-        <activity android:name=".VideoPlayActivity"></activity>
+        <activity android:name=".SecureAlbumActivity"></activity>
+        <activity android:name=".VideoPlayActivity" />
         <activity android:name=".AlbumViewActivity" />
         <activity
             android:name=".EditPic"
@@ -53,7 +54,7 @@
             <!-- <data android:mimeType="" -->
             <!-- </intent-filter> -->
         </activity>
-        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"/>
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />
     </application>
 
 </manifest>

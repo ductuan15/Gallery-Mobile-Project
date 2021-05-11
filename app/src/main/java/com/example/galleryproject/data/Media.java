@@ -46,7 +46,6 @@ public abstract class Media implements Parcelable {
     boolean isTrash = false;
     int albumIn;
 
-    public static final String SECURE_ALBUM_INTERNAL_DIR_NAME = "secure_album";
 
     public Media(Uri uri, String size, String date, String resolution, int MEDIA_TYPE, String fileName, String location, int orientation, boolean isFavorite, boolean isTrash) {
         this.uri = uri;
@@ -319,7 +318,7 @@ public abstract class Media implements Parcelable {
 //                if(coordinate!=null){
 //                    Log.e("TAG", "getAllMediaUri: ");
 //                }
-////
+//
 //                location = getAddress(coordinate[0], coordinate[1], context);
 //                if(location!=null){
 //                    Log.e("", "OH YEAH" );
@@ -330,7 +329,7 @@ public abstract class Media implements Parcelable {
 
             String fileName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME));
 
-            String relavtivePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH));
+            String relativePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH));
             // media type
             int mediaType = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE));
 
@@ -340,7 +339,6 @@ public abstract class Media implements Parcelable {
             String bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME));
 
             int orientation = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.ORIENTATION));
-
             boolean isFavorite = false;
             boolean isTrash = false;
 
@@ -359,7 +357,7 @@ public abstract class Media implements Parcelable {
                 }
                 nextMedia = new VideoInfo(contentUri, null, null, null, mediaType, fileName, null, duration, orientation, isFavorite, isTrash);
                 mediaArrayList.add(nextMedia);
-                int albumPos = addVideoToAlbumList(relavtivePath, bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
+                int albumPos = addVideoToAlbumList(relativePath, bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
                 if (albumPos != -1)
                     nextMedia.setAlbumIn(albumPos);
 
@@ -389,7 +387,7 @@ public abstract class Media implements Parcelable {
                 }
                 nextMedia = new ImageInfo(contentUri, null, null, null, mediaType, fileName, location, orientation, isFavorite, isTrash);
                 mediaArrayList.add(nextMedia);
-                int albumPos = addImageToAlbumList(relavtivePath, bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
+                int albumPos = addImageToAlbumList(relativePath, bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
                 if (albumPos != -1)
                     nextMedia.setAlbumIn(albumPos);
             }
@@ -474,80 +472,6 @@ public abstract class Media implements Parcelable {
         return null;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public static int copyFile(Media media, String folderPath, Context context) {
-        InputStream a;
-        try {
-            a = context.getContentResolver().openInputStream(media.getUri());
-            Path path = FileSystems.getDefault().getPath(String.valueOf(getExternalStorageDirectory()), folderPath, media.getFileName());
-            if (Files.exists(path)) {
-                return 2;
-            }
-            Files.copy(a, path);
-            String absolutePath = getExternalStorageDirectory() + File.separator + folderPath + File.separator + media.getFileName();
-            MediaScannerConnection.scanFile(context, new String[]{absolutePath}, null, null);
-            return 1;
-        } catch (IOException ioException) {
-            Log.e("TAG", ioException.getMessage());
-            ;
-            return 0;
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public static int moveFile(Media media, DefaultAlbum des, DefaultAlbum src, Context content) {
-        Path desPath = FileSystems.getDefault().getPath(String.valueOf(getExternalStorageDirectory()), des.albumPath, media.getFileName());
-        Path srcPath = FileSystems.getDefault().getPath(String.valueOf(getExternalStorageDirectory()), src.albumPath, media.getFileName());
-        try {
-            Files.move(srcPath, desPath);
-            String filePath = getExternalStorageDirectory() + File.separator + des.getAlbumPath() + File.separator + media.getFileName();
-            MediaScannerConnection.scanFile(content, new String[]{filePath}, null, null);
-            content.getContentResolver().delete(
-                    media.getUri(),
-                    null,
-                    null);
-        } catch (FileAlreadyExistsException e) {
-            Log.e("", e.toString());
-            return 2;
-        } catch (IOException e) {
-            Log.e("", e.toString());
-            return 0;
-        }
-        return 1;
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public static void moveToSecureAlbum(Media srcMedia, Context context) {
-        String srcPathStr = Media.getFilePath(srcMedia.getUri(),context.getContentResolver());
-        Path srcPath = FileSystems.getDefault().getPath(srcPathStr);
-        Path desPath = FileSystems.getDefault().getPath(String.valueOf(context.getFilesDir()),Media.SECURE_ALBUM_INTERNAL_DIR_NAME ,srcMedia.fileName);
-        String folderPath = context.getFilesDir() + File.separator + Media.SECURE_ALBUM_INTERNAL_DIR_NAME;
-        File folder = new File(folderPath);
-        boolean success = true;
-        if (!folder.exists()) {
-            success = folder.mkdirs();
-        }
-        if(success){
-            try {
-                Files.copy(srcPath, desPath);
-            } catch (IOException e) {
-                Log.e("TAG", e.getMessage());
-            }
-        }
-    }
-    public static String getFilePath(Uri mediaUri, ContentResolver contentResolver){
-        String result;
-        Cursor cursor = contentResolver.query(mediaUri, null, null, null, null);
-        if (cursor == null) { // Source is Dropbox or other similar local file path
-            return null;
-        } else {
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            result = cursor.getString(idx);
-            cursor.close();
-        }
-        return result;
-    }
 
     public static Uri getUriMediaCollection(int mediaType) {
         Uri mediaCollection = null;

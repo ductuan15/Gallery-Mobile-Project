@@ -15,4 +15,9 @@
         app:showAsAction="always"
         android:title="@string/title_gotocam">
     </item>
+    <item
+        android:id="@+id/go_to_secure_album"
+        app:showAsAction= "withText"
+        android:title="@string/title_gotocam">
+    </item>
 </menu>
