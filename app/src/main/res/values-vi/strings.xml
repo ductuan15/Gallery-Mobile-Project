@@ -48,6 +48,7 @@
     <string name="enter_password">Enter password</string>
     <string name="change_password">Change password</string>
     <string name="unlock_all_media">Mở khoá toàn bộ</string>
+    <string name="stop_slideshow">Dừng trình diễn</string>
 
 
 </resources>
