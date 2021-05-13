@@ -3,12 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    style="@style/Theme.MaterialComponents.NoActionBar">
+    android:layout_height="match_parent">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:theme="@style/Theme.GalleryProject"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:menu="@menu/viewpicture_menu"
+            app:title="@string/app_name" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/media_viewpager"
         android:layout_width="match_parent"
@@ -35,8 +49,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:clickable="true"
-            android:src="@drawable/ic_baseline_edit_24"
-            android:focusable="true" />
+            android:focusable="true"
+            android:src="@drawable/ic_baseline_edit_24" />
 
         <ImageButton
             android:id="@+id/share_button"
@@ -45,8 +59,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:clickable="true"
-            android:src="@drawable/ic_baseline_share_24"
-            android:focusable="true" />
+            android:focusable="true"
+            android:src="@drawable/ic_baseline_share_24" />
 
         <ImageButton
             android:id="@+id/delete_button"
@@ -55,8 +69,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:clickable="true"
-            android:src="@drawable/ic_baseline_delete_24"
-            android:focusable="true" />
+            android:focusable="true"
+            android:src="@drawable/ic_baseline_delete_24" />
 
         <ImageButton
             android:id="@+id/favorite_button"
@@ -66,8 +80,8 @@
             android:layout_weight="1"
             android:clickable="true"
 
-            android:src="@drawable/ic_baseline_favorite_24"
-            android:focusable="true" />
+            android:focusable="true"
+            android:src="@drawable/ic_baseline_favorite_24" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

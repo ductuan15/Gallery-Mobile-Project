@@ -38,6 +38,7 @@
         <activity
             android:name=".SlideMediaActivity"
             android:exported="true"
+            android:theme="@style/Theme.GalleryProject.NoActionBar"
             android:label="@string/title_activity_view_picture" >
         </activity>
         <activity

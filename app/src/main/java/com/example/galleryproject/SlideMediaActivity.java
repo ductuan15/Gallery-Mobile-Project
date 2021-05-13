@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -18,6 +19,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,8 +35,11 @@ import com.example.galleryproject.data.DefaultAlbum;
 import com.example.galleryproject.data.Media;
 
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class SlideMediaActivity extends AppCompatActivity implements View.OnClickListener {
@@ -46,7 +51,10 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
     LinearLayout buttonLayout;
     ActionBar actionBar;
     boolean isNavigateVisible = true;
+    boolean isSlideShow = false;
     SlideMediaAdapter slideMediaAdapter;
+
+    Timer timerSlideShow;
 
 
     public HashSet<String> favoriteMediaHashSet = new HashSet<>();
@@ -60,23 +68,24 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide_media);
 
+
         // get shared preferences
         favoriteSharedPreferences = SharePreferenceHandler.getFavoriteSharePreferences(this);
         favoriteEditor = favoriteSharedPreferences.edit();
         favoriteEditor.apply();
-        SharePreferenceHandler.getAllDataFromSharedPreference(favoriteSharedPreferences,favoriteMediaHashSet);
+        SharePreferenceHandler.getAllDataFromSharedPreference(favoriteSharedPreferences, favoriteMediaHashSet);
 
-
-
+        Toolbar myToolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(myToolbar);
         this.actionBar = getSupportActionBar();
         this.buttonLayout = findViewById(R.id.button_layout);
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        curDefaultAlbum =  bundle.getParcelable("curAlbum");
-        if(curDefaultAlbum != null){
+        curDefaultAlbum = bundle.getParcelable("curAlbum");
+        if (curDefaultAlbum != null) {
             mediaArrayList.addAll(curDefaultAlbum.getMediaArrayList());
-        }else{
+        } else {
             Media.getAllMediaUri(this, mediaArrayList, defaultAlbumArrayList, favoriteMediaHashSet);
         }
 
@@ -125,7 +134,7 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
                 } else {
                     favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24, getTheme()));
                     if (favoriteMediaHashSet.contains(mediaSelected.getUri().toString())) ;
-                        favoriteEditor.remove(mediaSelected.getUri().toString());
+                    favoriteEditor.remove(mediaSelected.getUri().toString());
                 }
                 favoriteEditor.apply();
             } catch (Exception e) {
@@ -154,6 +163,23 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
                     favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24, getTheme()));
             }
         });
+        this.viewPager.setPageTransformer(new DepthPageTransformer());
+
+        isSlideShow = bundle.getBoolean("isSlideShow");
+        if (isSlideShow) {
+            Handler handler = new Handler();
+            Runnable update = () -> {
+                viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
+            };
+            timerSlideShow= new Timer();
+            timerSlideShow.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    handler.post(update);
+                }
+            }, 1000, 1000);
+        }
+
     }
 
 
@@ -172,11 +198,11 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
                 int res = FileHandler.moveToSecureAlbum(srcMedia, this);
                 return true;
             case R.id.detail_button:
-                if(curDefaultAlbum == null)
-                    srcMedia.getMediaDetail(defaultAlbumArrayList.get(srcMedia.getAlbumIn()),getContentResolver(),this);
+                if (curDefaultAlbum == null)
+                    srcMedia.getMediaDetail(defaultAlbumArrayList.get(srcMedia.getAlbumIn()), getContentResolver(), this);
                 else
-                    srcMedia.getMediaDetail(curDefaultAlbum,getContentResolver(),this);
-                View dialogRoot = LayoutInflater.from(this).inflate(R.layout.dialog_media_detail,null);
+                    srcMedia.getMediaDetail(curDefaultAlbum, getContentResolver(), this);
+                View dialogRoot = LayoutInflater.from(this).inflate(R.layout.dialog_media_detail, null);
                 TextView fileName = dialogRoot.findViewById(R.id.filename_text);
                 TextView dataAdd = dialogRoot.findViewById(R.id.date_add_text);
                 TextView albumPath = dialogRoot.findViewById(R.id.album_path_text);
@@ -185,9 +211,9 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
                 TextView location = dialogRoot.findViewById(R.id.location_text);
                 fileName.setText(srcMedia.getFileName());
                 dataAdd.setText(Media.getDate(Long.parseLong(srcMedia.getDate())).toString());
-                if(curDefaultAlbum == null){
+                if (curDefaultAlbum == null) {
                     albumPath.setText(defaultAlbumArrayList.get(srcMedia.getAlbumIn()).getAlbumPath());
-                }else{
+                } else {
                     albumPath.setText(curDefaultAlbum.getAlbumPath());
                 }
                 size.setText(srcMedia.getTransferSize());
@@ -205,6 +231,12 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
             case R.id.copy_button:
 
                 return true;
+            case R.id.stop_slideshow_opt:
+                if(timerSlideShow != null){
+                    timerSlideShow.cancel();
+                    isSlideShow = false;
+                    invalidateOptionsMenu();
+                }
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -226,7 +258,10 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.viewpicture_menu, menu);
+        if (isSlideShow)
+            inflater.inflate(R.menu.slideshow_menu, menu);
+        else
+            inflater.inflate(R.menu.viewpicture_menu, menu);
         return true;
     }
 

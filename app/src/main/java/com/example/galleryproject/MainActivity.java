@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.renderscript.ScriptGroup;
+import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -75,8 +77,6 @@ public class MainActivity extends AppCompatActivity {
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         currentLanguage = defaultSharedPreferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
         setLocale(currentLanguage);
-
-        curPassword = defaultSharedPreferences.getString(getString(R.string.pin_key), getString(R.string.default_pin_key));
 
         // get all favorite media
 
@@ -225,8 +225,12 @@ public class MainActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.slideshow_opt:
-
-                return true;
+                Intent intentSlideShow = new Intent(this, SlideMediaActivity.class);
+                Bundle data = new Bundle();
+                data.putInt("mediaPos", 0);
+                data.putBoolean("isSlideShow",true);
+                intentSlideShow.putExtras(data);
+                startActivity(intentSlideShow);
             case R.id.selectall:
 
                 return true;
@@ -236,9 +240,13 @@ public class MainActivity extends AppCompatActivity {
             case R.id.go_to_secure_album:
                     View dialogView = LayoutInflater.from(this).inflate(R.layout.diglog_input, null);
                     EditText passText = dialogView.findViewById(R.id.input_text);
+                    passText.setHint("Enter the secret (～o￣3￣)～");
+                    passText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
                 new MaterialAlertDialogBuilder(this)
                         .setTitle("Enter password")
+                        .setIcon(R.drawable.ic_baseline_lock_24)
+                        .setMessage("Password is required to enter this secure album =￣ω￣=")
                         .setView(dialogView)
                         .setNegativeButton("Cancel", (dialog,which) ->{
                             dialog.dismiss();

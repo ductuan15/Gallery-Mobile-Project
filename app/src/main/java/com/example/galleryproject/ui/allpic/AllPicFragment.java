@@ -217,6 +217,7 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
         Intent intent = new Intent(this.getActivity(), SlideMediaActivity.class);
         Bundle data = new Bundle();
         data.putInt("mediaPos", pos);
+        data.putBoolean("isSlideShow",false);
         intent.putExtras(data);
         startActivity(intent);
     }
