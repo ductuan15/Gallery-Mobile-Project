@@ -12,7 +12,6 @@
     <string name="title_detail">Chi tiết</string>
     <string name="title_set_as_wallpaper">Đặt làm ...</string>
     <string name="title_location_tag">Thêm địa diểm</string>
-    <string name="title_set_default_app">Đặt làm ứng dụng mặc định</string>
     <string-array name="Languages">
         <item name = "English">
             Tiếng anh
@@ -34,9 +33,21 @@
     <string name="copy">Sao chép</string>
     <string name="title_copy">Copy</string>
     <string name="title_lock">Khoá</string>
-    <string name="titlle_my_album">Album của tôi</string>
+    <string name="title_my_album">Album của tôi</string>
     <string name="title_people_location">Người và Địa điểm</string>
     <string name="title_change_Language">Ngôn ngữ</string>
     <string name="title_change_Theme">Giao diện</string>
     <string name="playVideoChip">Phát video</string>
+    <string name="detail">Chi tiết</string>
+    <string name="unknown">Không biết (￣﹃￣)</string>
+    <string name="move_to_album">Move to album</string>
+    <string name="delete">Xoá</string>
+    <string name="ask_for_delete_title">Bạn có chắc thực hiện thao tác xoá không?</string>
+    <string name="ask_for_delete_message">(Các) File sẽ bị xoá và không thể phục hồi</string>
+    <string name="change_layout">Thay đổi bố cục</string>
+    <string name="enter_password">Enter password</string>
+    <string name="change_password">Change password</string>
+    <string name="unlock_all_media">Mở khoá toàn bộ</string>
+
+
 </resources>

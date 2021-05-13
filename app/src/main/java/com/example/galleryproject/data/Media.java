@@ -8,6 +8,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.icu.text.SimpleDateFormat;
+import android.location.Address;
+import android.location.Geocoder;
+import android.media.ExifInterface;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -16,9 +21,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
+import com.example.galleryproject.FileHandler;
 import com.example.galleryproject.entity.FavoriteMedia;
 
 import java.io.File;
@@ -29,23 +36,26 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 
 import static android.os.Environment.*;
 
 public abstract class Media implements Parcelable {
     final Uri uri;
-    final String size;
-    final String date;
-    final String resolution;
+    String size;
+    String date;
+    String resolution;
     final int MEDIA_TYPE;
     final String fileName;
-    final String location;
+    String location;
     final int orientation;
     boolean isFavorite = false;
     boolean isTrash = false;
     int albumIn;
-
+    private static final String[] sizeNotation = {"B", "KB", "MB", "GB"};
 
     public Media(Uri uri, String size, String date, String resolution, int MEDIA_TYPE, String fileName, String location, int orientation, boolean isFavorite, boolean isTrash) {
         this.uri = uri;
@@ -145,10 +155,49 @@ public abstract class Media implements Parcelable {
         return this.albumIn;
     }
 
+    public String getSize() {
+        return size;
+    }
+
+    public String getTransferSize() {
+        int notationPos = 0;
+        float transferSize = (float) Long.parseLong(this.size);
+        while (transferSize > 1024) {
+            transferSize /= 1024;
+            notationPos++;
+        }
+        transferSize = (float) (Math.round(transferSize * 100.00) / 100.00);
+        return transferSize + sizeNotation[notationPos];
+    }
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
     public void setAlbumIn(int albumIn) {
         this.albumIn = albumIn;
     }
 
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
     public void changeFavoriteState() {
         this.isFavorite = !this.isFavorite;
@@ -283,6 +332,7 @@ public abstract class Media implements Parcelable {
                 MediaStore.Files.FileColumns.DISPLAY_NAME,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,
                 MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+                MediaStore.MediaColumns.DATE_ADDED,
                 MediaStore.MediaColumns.DURATION,
                 MediaStore.MediaColumns.ORIENTATION,
         };
@@ -335,6 +385,7 @@ public abstract class Media implements Parcelable {
 
             long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
 
+            String dataAdded =  cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED));
             //directory of file
             String bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME));
 
@@ -355,7 +406,7 @@ public abstract class Media implements Parcelable {
                 if (favoriteMediaHashSet.contains(contentUri.toString())) {
                     isFavorite = true;
                 }
-                nextMedia = new VideoInfo(contentUri, null, null, null, mediaType, fileName, null, duration, orientation, isFavorite, isTrash);
+                nextMedia = new VideoInfo(contentUri, null, dataAdded, null, mediaType, fileName, null, duration, orientation, isFavorite, isTrash);
                 mediaArrayList.add(nextMedia);
                 int albumPos = addVideoToAlbumList(relativePath, bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
                 if (albumPos != -1)
@@ -385,7 +436,7 @@ public abstract class Media implements Parcelable {
                 if (favoriteMediaHashSet.contains(contentUri.toString())) {
                     isFavorite = true;
                 }
-                nextMedia = new ImageInfo(contentUri, null, null, null, mediaType, fileName, location, orientation, isFavorite, isTrash);
+                nextMedia = new ImageInfo(contentUri, null, dataAdded, null, mediaType, fileName, location, orientation, isFavorite, isTrash);
                 mediaArrayList.add(nextMedia);
                 int albumPos = addImageToAlbumList(relativePath, bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
                 if (albumPos != -1)
@@ -396,13 +447,62 @@ public abstract class Media implements Parcelable {
     }
 
 
-//    public static String getAddress(double lat, double lng, Context context) {
-//        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-//        try {
-//            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-//            if (addresses.size() != 0) {
-//                Address obj = addresses.get(0);
-//                String add = obj.getAddressLine(0);
+    public void getMediaDetail(DefaultAlbum albumIn, ContentResolver contentResolver, Context context) {
+        String[] projection = {
+                MediaStore.MediaColumns.SIZE,
+                MediaStore.MediaColumns.DATE_ADDED,
+        };
+        Cursor cursor = contentResolver.query(this.uri, projection, null, null, null);
+        if (cursor == null) {
+            return;
+        }
+        cursor.moveToNext();
+        String size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE));
+        String dateAdded = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED));
+        String resolution = "";
+        String filePath = FileHandler.EXTERNAL_STORAGE_DIR + albumIn.getAlbumPath() + this.fileName;
+        if (this.getMEDIA_TYPE() == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(filePath, options);
+            resolution = options.outWidth + "x" + options.outHeight;
+        } else {
+            MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
+            metaRetriever.setDataSource(filePath);
+            String height = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+            String width = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+            resolution = width + "x" + height;
+        }
+
+        String location = "";
+        float [] coordination = new float[2];
+        ExifInterface exifInterface = null;
+        try {
+            exifInterface = new ExifInterface(filePath);
+            if(exifInterface.getLatLong(coordination))
+                location = getAddress(coordination[0],coordination[1], context);
+            else
+                location = "unknown";
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        this.setSize(size);
+        this.setDate(dateAdded);
+        this.setResolution(resolution);
+        this.setLocation(location);
+        cursor.close();
+    }
+
+
+    public static String getAddress(double lat, double lng, Context context) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+            if (addresses.size() != 0) {
+                Address obj = addresses.get(0);
+                String add = obj.getAddressLine(0);
 //                add = add + "\n" + obj.getCountryName();
 //                add = add + "\n" + obj.getCountryCode();
 //                add = add + "\n" + obj.getAdminArea();
@@ -410,15 +510,15 @@ public abstract class Media implements Parcelable {
 ////                add = add + "\n" + obj.getSubAdminArea();
 ////                add = add + "\n" + obj.getLocality();
 ////                add = add + "\n" + obj.getSubThoroughfare();
-//                return add;
-//            }
-//
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+                return add;
+            }
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     private static int addImageToAlbumList(String albumPath, String bucketName, ArrayList<DefaultAlbum> defaultAlbumArrayList, ImageInfo nextMedia) {
 
@@ -472,6 +572,10 @@ public abstract class Media implements Parcelable {
         return null;
     }
 
+    public static Date getDate(long val) {
+        return new Date(val * 1000L);
+    }
+
 
     public static Uri getUriMediaCollection(int mediaType) {
         Uri mediaCollection = null;
@@ -493,4 +597,22 @@ public abstract class Media implements Parcelable {
         return mediaCollection;
     }
 
+    public void deleteMedia(Context context){
+        try {
+            ContentResolver resolver = context.getContentResolver();            // Remove a specific media item.
+            Uri imageUri = this.getUri();                        // URI of the image to remove.
+            // Perform the actual removal.
+            int numImagesRemoved = resolver.delete(
+                    imageUri,
+                    null,
+                    null);
+            if (numImagesRemoved == 0) {
+                Toast.makeText(context, "Delete unsuccessfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(context, "Delete successfully", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e("Error", e.getMessage());
+        }
+    }
 }

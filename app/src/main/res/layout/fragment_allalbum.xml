@@ -14,7 +14,7 @@
             android:id="@+id/my_albums_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/titlle_my_album"
+            android:text="@string/title_my_album"
             android:textStyle="bold"
             android:textSize="25sp"
             app:layout_constraintEnd_toEndOf="parent"

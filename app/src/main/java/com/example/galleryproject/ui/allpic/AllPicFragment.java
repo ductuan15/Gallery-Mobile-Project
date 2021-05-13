@@ -1,5 +1,6 @@
 package com.example.galleryproject.ui.allpic;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -34,10 +35,8 @@ import com.example.galleryproject.ThumbnailPictureAdapter;
 import com.example.galleryproject.SlideMediaActivity;
 import com.example.galleryproject.data.Media;
 import com.example.galleryproject.ui.DetailsLookup;
-import com.example.galleryproject.viewmodel.FavoriteMediaViewModel;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 //public class AllPicFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener {
 
@@ -48,10 +47,11 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
 
     ArrayList<Media> mediaArrayList;
     SelectionTracker<Long> selectionTracker;
-    public HashSet<String> favoriteMediaHashSet = new HashSet<>();
 
     SwipeRefreshLayout swipeRefreshLayout;
     boolean isSelectionMode = false;
+    static int[] numsCol = {1,3,7};
+    int curNumColPos = 1;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,10 +64,10 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
                              ViewGroup container, Bundle savedInstanceState) {
         allPicViewModel = new ViewModelProvider(this).get(AllPicViewModel.class);
         View root = inflater.inflate(R.layout.fragment_allpic, container, false);
-        int colNum = 3;
         int orientation = requireActivity().getResources().getConfiguration().orientation;
+
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            colNum = 8;
+            curNumColPos = 2;
         }
 
 
@@ -78,7 +78,7 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
         this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaArrayList, this.getContext(), this.selectionTracker, this);
 
         this.thumbnailPicGridView.setHasFixedSize(true);
-        this.thumbnailPicGridView.setLayoutManager(new GridLayoutManager(getActivity(), colNum));
+        this.thumbnailPicGridView.setLayoutManager(new GridLayoutManager(getActivity(),numsCol[curNumColPos]));
         this.thumbnailPicGridView.setAdapter(this.thumbnailPictureAdapter);
 
 
@@ -153,8 +153,19 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.change_layout_opt){
+            curNumColPos = (curNumColPos + 1)% numsCol.length;
+            if(numsCol[curNumColPos] > 5){
+                thumbnailPictureAdapter.setIsSmall(true);
+            }else{
+                thumbnailPictureAdapter.setIsSmall(false);
+            }
+            this.thumbnailPicGridView.setLayoutManager(new GridLayoutManager(getActivity(),numsCol[curNumColPos]));
+
+
+        }
         // move to album mode
-        if (item.getItemId() == R.id.move_to_album_opt) {
+        else if (item.getItemId() == R.id.move_to_album_opt) {
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             AlbumSelectDialogFragment newFragment = new AlbumSelectDialogFragment(((MainActivity) requireActivity()).defaultAlbumArrayList,
                     ((MainActivity) requireActivity()).mediaArrayList,
@@ -171,6 +182,25 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
                     AlbumSelectDialogFragment.COPY_TO_ALBUM_MODE);
             newFragment.show(fragmentManager, "dialog");
         }
+        else if (item.getItemId() == R.id.delete_opt){
+
+            new AlertDialog.Builder(requireActivity())
+                    .setTitle(R.string.ask_for_delete_title)
+                    .setMessage(R.string.ask_for_delete_message)
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        for(Long l:selectionTracker.getSelection()){
+                            if (l < Integer.MAX_VALUE && l >= 0){
+                                int i = l.intValue(); 
+                                mediaArrayList.get(i).deleteMedia(requireActivity());
+                            }
+                        }
+                        this.selectionTracker.clearSelection();
+                        ((MainActivity) requireActivity()).getAllDataSet();
+                        thumbnailPictureAdapter.setMediaArrayList(mediaArrayList);
+                        thumbnailPictureAdapter.notifyDataSetChanged();
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create().show();
+        }
         return false;
     }
 
@@ -182,11 +212,11 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
 
     @Override
     public void onClick(View v) {
-            ThumbnailPictureAdapter.ThumbnailPictureViewHolder viewHolder = (ThumbnailPictureAdapter.ThumbnailPictureViewHolder) v.getTag();
-            int pos = viewHolder.getAdapterPosition();
+        ThumbnailPictureAdapter.ThumbnailPictureViewHolder viewHolder = (ThumbnailPictureAdapter.ThumbnailPictureViewHolder) v.getTag();
+        int pos = viewHolder.getAdapterPosition();
         Intent intent = new Intent(this.getActivity(), SlideMediaActivity.class);
         Bundle data = new Bundle();
-        data.putInt("imgPos", pos);
+        data.putInt("mediaPos", pos);
         intent.putExtras(data);
         startActivity(intent);
     }

@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/move_to_album_opt"
-        android:title="Move to album">
+        android:title="@string/move_to_album">
     </item>
     <item
         android:id="@+id/copy_to_album_opt"
         android:title="Copy to album">
     </item>
+    <item
+        android:id="@+id/delete_opt"
+        android:title="@string/delete"
+        android:icon="@drawable/ic_baseline_delete_24"
+        app:showAsAction="always" />
 </menu>

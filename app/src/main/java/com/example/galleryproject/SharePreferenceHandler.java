@@ -8,12 +8,8 @@ import java.util.HashSet;
 import java.util.Map;
 
 public abstract class SharePreferenceHandler {
-    public static final String SECURE_SHARED_PREFERENCES = "secure_file_shared_preferences";
     public static final String FAVORITE_SHARED_PREFERENCES= "favorite_file_shared_preferences";
 
-    public static SharedPreferences getSecureSharePreferences(Context context){
-        return context.getSharedPreferences(SECURE_SHARED_PREFERENCES,Context.MODE_PRIVATE);
-    }
     public static SharedPreferences getFavoriteSharePreferences(Context context){
         return context.getSharedPreferences(FAVORITE_SHARED_PREFERENCES,Context.MODE_PRIVATE);
     }

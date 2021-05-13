@@ -2,7 +2,6 @@ package com.example.galleryproject;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,9 +16,12 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,12 +43,12 @@ import com.example.galleryproject.data.DefaultAlbum;
 import com.example.galleryproject.data.Media;
 import com.example.galleryproject.ui.allpic.AllPicFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,32 +59,34 @@ public class MainActivity extends AppCompatActivity {
     String currentTheme = "Light";
     Locale myLocale;
     String currentLang;                 //key intent
-    SharedPreferences languagePreferences;
+    SharedPreferences defaultSharedPreferences;
     SharedPreferences favoriteSharedPreferences;
 
     public ArrayList<Media> mediaArrayList = new ArrayList<>();
     public ArrayList<DefaultAlbum> defaultAlbumArrayList = new ArrayList<>();
     public HashSet<String> favoriteMediaHashSet = new HashSet<>();
+    public String curPassword;
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        languagePreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        currentLanguage = languagePreferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        currentLanguage = defaultSharedPreferences.getString(getString(R.string.language_key), "en");               // get selected option from preference language_key
         setLocale(currentLanguage);
 
+        curPassword = defaultSharedPreferences.getString(getString(R.string.pin_key), getString(R.string.default_pin_key));
+
         // get all favorite media
-       favoriteSharedPreferences = SharePreferenceHandler.getFavoriteSharePreferences(this);
 
-
+        favoriteSharedPreferences = SharePreferenceHandler.getFavoriteSharePreferences(this);
 
 
         ActionBar actionBar = getSupportActionBar();                                                            //change color for actionbar
         ColorDrawable colorDrawable;
 
-        currentTheme = languagePreferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference theme
+        currentTheme = defaultSharedPreferences.getString(getString(R.string.theme_key), "Light");               // get selected option from preference theme
         switch (currentTheme) {
             case "Light": {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -125,8 +129,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        //reload password
+        curPassword = defaultSharedPreferences.getString(getString(R.string.pin_key), getString(R.string.default_pin_key));
         // get all favorite media
-        SharePreferenceHandler.getAllDataFromSharedPreference(favoriteSharedPreferences,favoriteMediaHashSet);
+        SharePreferenceHandler.getAllDataFromSharedPreference(favoriteSharedPreferences, favoriteMediaHashSet);
         // get all data need to run app
         getAllDataSet();
     }
@@ -228,8 +234,25 @@ public class MainActivity extends AppCompatActivity {
                 dispatchTakePictureIntent();
                 return true;
             case R.id.go_to_secure_album:
-                Intent intent = new Intent(this,SecureAlbumActivity.class);
-                startActivity(intent);
+                    View dialogView = LayoutInflater.from(this).inflate(R.layout.diglog_input, null);
+                    EditText passText = dialogView.findViewById(R.id.input_text);
+
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle("Enter password")
+                        .setView(dialogView)
+                        .setNegativeButton("Cancel", (dialog,which) ->{
+                            dialog.dismiss();
+                        })
+                        .setPositiveButton("OK", (dialog, which) -> {
+                            String inputPassword = passText.getText().toString();
+                            if(inputPassword.compareTo(curPassword)==0){
+                                Intent intent = new Intent(this, SecureAlbumActivity.class);
+                                startActivity(intent);
+                            }
+                            else{
+                                Toast.makeText(getBaseContext(),"Wrong password",Toast.LENGTH_SHORT).show();
+                            }
+                        }).create().show();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -260,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
     public void getAllDataSet() {
         this.mediaArrayList.clear();
         this.defaultAlbumArrayList.clear();
-        Media.getAllMediaUri(this, this.mediaArrayList, this.defaultAlbumArrayList,this.favoriteMediaHashSet);
+        Media.getAllMediaUri(this, this.mediaArrayList, this.defaultAlbumArrayList, this.favoriteMediaHashSet);
         Log.e("", "getAllDataSet: ");
     }
 }

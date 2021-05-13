@@ -95,8 +95,9 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
         if (item.getItemId() == R.id.cancel_action_opt) {
             dismiss();
         } else if (item.getItemId() == R.id.create_album_opt) {
-            View dialogView = LayoutInflater.from(requireActivity()).inflate(R.layout.diglog_input, null);
-            EditText albumText = dialogView.findViewById(R.id.album_name_text);
+                View dialogView = LayoutInflater.from(requireActivity()).inflate(R.layout.diglog_input, null);
+            EditText albumText = dialogView.findViewById(R.id.input_text);
+            albumText.setHint(R.string.enter_password);
             new MaterialAlertDialogBuilder(requireActivity())
                     .setTitle("Create album")
                     .setView(dialogView)
