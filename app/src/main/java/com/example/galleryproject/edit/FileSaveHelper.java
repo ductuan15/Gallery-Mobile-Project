@@ -130,7 +130,7 @@ public class FileSaveHelper implements LifecycleObserver {
             imageCollection = MediaStore.Images.Media.getContentUri(
                     MediaStore.VOLUME_EXTERNAL_PRIMARY
             );
-            newImageDetails.put(MediaStore.Images.Media.IS_PENDING, 1);
+            newImageDetails.put(MediaStore.Images.Media.IS_PENDING, 0);
         } else {
             imageCollection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         }

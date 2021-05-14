@@ -1,6 +1,8 @@
 package com.example.galleryproject;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +25,14 @@ public class ThumbnailMediaDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void onDraw(@NonNull @NotNull Canvas c, @NonNull @NotNull RecyclerView parent, @NonNull @NotNull RecyclerView.State state) {
         super.onDraw(c, parent, state);
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        c.drawPaint(paint);
+
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(20);
+        c.drawText("Some Text", 10, 25, paint);
     }
 
     @Override

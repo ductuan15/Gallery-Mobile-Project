@@ -2,6 +2,7 @@ package com.example.galleryproject;
 
 import android.Manifest;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,6 +31,8 @@ import com.example.galleryproject.edit.filters.FilterListener;
 import com.example.galleryproject.edit.filters.FilterViewAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.theartofdev.edmodo.cropper.CropImage;
+
+import java.io.File;
 
 import ja.burhanrashid52.photoeditor.PhotoEditor;
 import ja.burhanrashid52.photoeditor.PhotoEditorView;
@@ -201,7 +204,11 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
                     mPhotoEditor.saveAsFile(filePath, saveSettings, new PhotoEditor.OnSaveListener() {
                         @Override
                         public void onSuccess(@NonNull String imagePath) {
-                            mSaveFileHelper.notifyThatFileIsNowPubliclyAvailable(getContentResolver());
+                            if(!FileSaveHelper.isSdkHigherThan28())
+                                mSaveFileHelper.notifyThatFileIsNowPubliclyAvailable(getContentResolver());
+                            else{
+                                MediaScannerConnection.scanFile(getBaseContext(), new String[]{filePath}, null, null);
+                            }
                             Toast.makeText(EditPic.this, "Image Saved Successfully", Toast.LENGTH_SHORT).show();
                             mSaveImageUri = uri;
                             mPhotoEditorView.getSource().setImageURI(mSaveImageUri);
