@@ -44,7 +44,7 @@ import java.util.TimerTask;
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
 
-public class SlideMediaActivity extends AppCompatActivity implements View.OnClickListener {
+public class    SlideMediaActivity extends AppCompatActivity implements View.OnClickListener {
     ViewPager2 viewPager;
     ArrayList<Media> mediaArrayList = new ArrayList<>();
     ArrayList<DefaultAlbum> defaultAlbumArrayList = new ArrayList<>();

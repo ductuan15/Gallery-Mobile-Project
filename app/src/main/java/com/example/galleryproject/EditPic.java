@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -31,8 +32,6 @@ import com.example.galleryproject.edit.filters.FilterListener;
 import com.example.galleryproject.edit.filters.FilterViewAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.theartofdev.edmodo.cropper.CropImage;
-
-import java.io.File;
 
 import ja.burhanrashid52.photoeditor.PhotoEditor;
 import ja.burhanrashid52.photoeditor.PhotoEditorView;
@@ -72,6 +71,11 @@ public class EditPic extends AppCompatActivity implements PropertiesBSFragment.P
 
         Bundle data = getIntent().getExtras();
         Uri imageUri = data.getParcelable("imageUri");
+        ActionBar toolbar = getSupportActionBar();
+        if (toolbar != null) {
+            toolbar.setTitle("");
+        }
+
         mPhotoEditorView = findViewById(R.id.photoEditorView);
         mPhotoEditorView.getSource().setImageURI(imageUri);
 

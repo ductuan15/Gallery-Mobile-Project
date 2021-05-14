@@ -45,8 +45,8 @@
     <string name="ask_for_delete_title">Bạn có chắc thực hiện thao tác xoá không?</string>
     <string name="ask_for_delete_message">(Các) File sẽ bị xoá và không thể phục hồi</string>
     <string name="change_layout">Thay đổi bố cục</string>
-    <string name="enter_password">Enter password</string>
-    <string name="change_password">Change password</string>
+    <string name="enter_password">Nhập mật khẩu</string>
+    <string name="change_password">Thay đổi mật khẩu</string>
     <string name="unlock_all_media">Mở khoá toàn bộ</string>
     <string name="stop_slideshow">Dừng trình diễn</string>
     <string name="unlock_media">Mở khoá media</string>
@@ -54,8 +54,8 @@
     <string name="image">Hình ảnh</string>
     <string name="secret_album">Secret album</string>
     <string name="cannot_use_camera">Can\'t use camera</string>
-    <string name="Delete_fail">Fail to delete</string>
-    <string name="deleted">Deleted</string>
+    <string name="Delete_fail">Xoá không thành công</string>
+    <string name="deleted">Đã xoá</string>
     <string name="home">Home</string>
     <string name="title_gotoSecureAlbum">Truy cập album ẩn</string>
 

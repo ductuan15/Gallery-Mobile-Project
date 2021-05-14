@@ -21,10 +21,10 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/game_lauchericon"
+        android:icon="@drawable/ic_baseline_image_24"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
-        android:roundIcon="@mipmap/game_lauchericon_round"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.GalleryProject.NoActionBar">
         <activity android:name=".SecureAlbumActivity"

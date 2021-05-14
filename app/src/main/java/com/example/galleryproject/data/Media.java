@@ -558,7 +558,7 @@ public abstract class Media implements Parcelable {
     public void deleteMedia(Context context) {
         try {
             ContentResolver resolver = context.getContentResolver();            // Remove a specific media item.
-            Uri imageUri = this.getUri();                        // URI of the image to remove.
+            Uri imageUri = this.getUri();                                       // URI of the image to remove.
             // Perform the actual removal.
             int numImagesRemoved = resolver.delete(
                     imageUri,
