@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/unlock_multi_opt"
+        android:title="@string/unlock_media"
+        android:icon="@drawable/ic_baseline_lock_open_24"
+        app:showAsAction="always">
+    </item>
+    <item
+        android:id="@+id/delete_opt"
+        android:title="@string/delete"
+        android:icon="@drawable/ic_baseline_delete_24"
+        app:showAsAction="ifRoom" />
+</menu>

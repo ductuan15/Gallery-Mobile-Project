@@ -4,22 +4,20 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,14 +30,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.galleryproject.data.DefaultAlbum;
+import com.example.galleryproject.data.ImageInfo;
 import com.example.galleryproject.data.Media;
+import com.example.galleryproject.data.VideoInfo;
 
 
-import java.sql.Time;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import wseemann.media.FFmpegMediaMetadataRetriever;
 
 
 public class SlideMediaActivity extends AppCompatActivity implements View.OnClickListener {
@@ -52,6 +54,8 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
     ActionBar actionBar;
     boolean isNavigateVisible = true;
     boolean isSlideShow = false;
+    boolean isSecureMode = false;
+
     SlideMediaAdapter slideMediaAdapter;
 
     Timer timerSlideShow;
@@ -60,9 +64,16 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
     public HashSet<String> favoriteMediaHashSet = new HashSet<>();
     SharedPreferences favoriteSharedPreferences;
     SharedPreferences.Editor favoriteEditor;
+    public final static int VIEW_MODE_ALL = 0;
+    public final static int VIEW_MODE_ALBUM = 1;
+    public final static int VIEW_MODE_SECURE_ALBUM = 2;
+    public final static int VIEW_MODE_TYPE_MEDIA = 3;
+    public final static int VIEW_MODE_ACTION_SEND = 4;
+
+    int viewMode = VIEW_MODE_ALL;
+
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,21 +86,25 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
         favoriteEditor.apply();
         SharePreferenceHandler.getAllDataFromSharedPreference(favoriteSharedPreferences, favoriteMediaHashSet);
 
-        Toolbar myToolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(myToolbar);
+        Toolbar toolbar = findViewById(R.id.mainTopAppBar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
         this.actionBar = getSupportActionBar();
+        if (this.actionBar != null) {
+            this.actionBar.setTitle("");
+        }
         this.buttonLayout = findViewById(R.id.button_layout);
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        curDefaultAlbum = bundle.getParcelable("curAlbum");
-        if (curDefaultAlbum != null) {
-            mediaArrayList.addAll(curDefaultAlbum.getMediaArrayList());
-        } else {
-            Media.getAllMediaUri(this, mediaArrayList, defaultAlbumArrayList, favoriteMediaHashSet);
-        }
+        if (getIntent().getData() != null) {
+            viewMode = VIEW_MODE_ACTION_SEND;
 
-        // get all media
+        } else {
+            viewMode = bundle.getInt("view_mode");
+        }
+        getDataSet(intent, bundle, viewMode);
+
 
         shareBtn = findViewById(R.id.share_button);
         shareBtn.setOnClickListener(v -> {
@@ -129,12 +144,12 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
                 mediaSelected.changeFavoriteState();
                 if (mediaArrayList.get(pos).isFavorite()) {
                     favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_red24, getTheme()));
-                    if (!favoriteMediaHashSet.contains(mediaSelected.getUri().toString())) ;
-                    favoriteEditor.putString(mediaSelected.getUri().toString(), "");
+                    if (!favoriteMediaHashSet.contains(mediaSelected.getUri().toString()))
+                        favoriteEditor.putString(mediaSelected.getUri().toString(), "");
                 } else {
                     favoriteBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_baseline_favorite_24, getTheme()));
-                    if (favoriteMediaHashSet.contains(mediaSelected.getUri().toString())) ;
-                    favoriteEditor.remove(mediaSelected.getUri().toString());
+                    if (favoriteMediaHashSet.contains(mediaSelected.getUri().toString()))
+                        favoriteEditor.remove(mediaSelected.getUri().toString());
                 }
                 favoriteEditor.apply();
             } catch (Exception e) {
@@ -171,7 +186,7 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
             Runnable update = () -> {
                 viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
             };
-            timerSlideShow= new Timer();
+            timerSlideShow = new Timer();
             timerSlideShow.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -181,6 +196,50 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
         }
 
     }
+
+    private void getDataSet(Intent intent, Bundle bundle, int viewMode) {
+
+        if (viewMode == VIEW_MODE_ALL) {
+            Media.getAllMediaUri(this, mediaArrayList, defaultAlbumArrayList, favoriteMediaHashSet);
+        } else if (viewMode == VIEW_MODE_SECURE_ALBUM) {
+            Media.getAllMediaUri(this, mediaArrayList, defaultAlbumArrayList, favoriteMediaHashSet);
+            curDefaultAlbum = bundle.getParcelable("curAlbum");
+            mediaArrayList.clear();
+            mediaArrayList.addAll(curDefaultAlbum.getMediaArrayList());
+        } else if (viewMode == VIEW_MODE_ALBUM) {
+            curDefaultAlbum = bundle.getParcelable("curAlbum");
+            mediaArrayList.clear();
+            mediaArrayList.addAll(curDefaultAlbum.getMediaArrayList());
+        } else if (viewMode == VIEW_MODE_TYPE_MEDIA) {
+            Media.getAllMediaUri(this, mediaArrayList, defaultAlbumArrayList, favoriteMediaHashSet);
+            curDefaultAlbum = bundle.getParcelable("curAlbum");
+            mediaArrayList.clear();
+            mediaArrayList.addAll(curDefaultAlbum.getMediaArrayList());
+        } else if (viewMode == VIEW_MODE_ACTION_SEND) {
+            Uri imgUri = intent.getData();
+            String filePath = FileHandler.getFilePath(imgUri, getContentResolver());
+            if (filePath != null) {
+                File file = new File(filePath);
+                FFmpegMediaMetadataRetriever mmr = new FFmpegMediaMetadataRetriever();
+                mmr.setDataSource(filePath);
+                String size = mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_FILESIZE);
+                String resolution = mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH) + "x" + mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+                int duration = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
+                String fileName = FileHandler.getFileName(file);
+                if (duration > 0) {
+                    VideoInfo newVideo = new VideoInfo(imgUri, size, null, resolution, MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO, fileName, null, duration, 0, false, false);
+                    this.mediaArrayList.add(newVideo);
+                } else {
+                    ImageInfo newImage = new ImageInfo(imgUri, size, null, resolution, MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE, fileName, null, 0, false, false);
+                    this.mediaArrayList.add(newImage);
+                }
+            } else {
+                Media.getAllMediaUri(this, mediaArrayList, defaultAlbumArrayList, favoriteMediaHashSet);
+            }
+        }
+    }
+
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -198,7 +257,7 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
                 int res = FileHandler.moveToSecureAlbum(srcMedia, this);
                 return true;
             case R.id.detail_button:
-                if (curDefaultAlbum == null)
+                if (viewMode != VIEW_MODE_ALBUM)
                     srcMedia.getMediaDetail(defaultAlbumArrayList.get(srcMedia.getAlbumIn()), getContentResolver(), this);
                 else
                     srcMedia.getMediaDetail(curDefaultAlbum, getContentResolver(), this);
@@ -232,12 +291,19 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
 
                 return true;
             case R.id.stop_slideshow_opt:
-                if(timerSlideShow != null){
+                if (timerSlideShow != null) {
                     timerSlideShow.cancel();
                     isSlideShow = false;
                     invalidateOptionsMenu();
                 }
-
+                return true;
+            case R.id.unlock_opt:
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                AlbumSelectDialogFragment newFragment = new AlbumSelectDialogFragment(this.defaultAlbumArrayList,
+                        this.mediaArrayList,
+                        viewPager.getCurrentItem(),
+                        AlbumSelectDialogFragment.MOVE_TO_ALBUM_MODE);
+                newFragment.show(fragmentManager, "dialog");
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -249,17 +315,19 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
 //        // set the wallpaper by calling the setResource function and
 //        // passing the drawable file
 //        wallpaperManager.getCropAndSetWallpaperIntent(uriArrayList.get(viewPager.getCurrentItem()));
-        Intent intent = new Intent(Intent.ACTION_ATTACH_DATA);
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        intent.setDataAndType(mediaArrayList.get(viewPager.getCurrentItem()).getUri(), "image/jpeg");
-        intent.putExtra("mimeType", "image/jpeg");
-        this.startActivity(Intent.createChooser(intent, "Set as:"));
+        Intent setWallPaperIntent = new Intent(Intent.ACTION_ATTACH_DATA);
+        setWallPaperIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        setWallPaperIntent.setDataAndType(mediaArrayList.get(viewPager.getCurrentItem()).getUri(), "image/jpeg");
+        setWallPaperIntent.putExtra("mimeType", "image/jpeg");
+        this.startActivity(Intent.createChooser(setWallPaperIntent, "Set as:"));
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         if (isSlideShow)
             inflater.inflate(R.menu.slideshow_menu, menu);
+        else if (isSecureMode)
+            inflater.inflate(R.menu.secure_media_view_menu, menu);
         else
             inflater.inflate(R.menu.viewpicture_menu, menu);
         return true;
@@ -275,10 +343,14 @@ public class SlideMediaActivity extends AppCompatActivity implements View.OnClic
                 this.isNavigateVisible = false;
             } else {
                 this.actionBar.show();
-                this.buttonLayout.setVisibility(View.VISIBLE);
+                if (!isSecureMode) {
+                    this.buttonLayout.setVisibility(View.VISIBLE);
+                }
                 this.isNavigateVisible = true;
             }
         }
     }
+
+
 }
 

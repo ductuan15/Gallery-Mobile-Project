@@ -8,7 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
 import android.location.Address;
 import android.location.Geocoder;
 import android.media.ExifInterface;
@@ -26,22 +26,17 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 
 import com.example.galleryproject.FileHandler;
-import com.example.galleryproject.entity.FavoriteMedia;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import static android.os.Environment.*;
+import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public abstract class Media implements Parcelable {
     final Uri uri;
@@ -56,6 +51,8 @@ public abstract class Media implements Parcelable {
     boolean isTrash = false;
     int albumIn;
     private static final String[] sizeNotation = {"B", "KB", "MB", "GB"};
+    private static final java.text.SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+
 
     public Media(Uri uri, String size, String date, String resolution, int MEDIA_TYPE, String fileName, String location, int orientation, boolean isFavorite, boolean isTrash) {
         this.uri = uri;
@@ -83,6 +80,7 @@ public abstract class Media implements Parcelable {
             isFavorite = in.readBoolean();
             isTrash = in.readBoolean();
         }
+        albumIn = in.readInt();
     }
 
 
@@ -120,6 +118,8 @@ public abstract class Media implements Parcelable {
             dest.writeBoolean(isFavorite);
             dest.writeBoolean(isTrash);
         }
+        dest.writeInt(albumIn);
+
     }
 
     @Override
@@ -219,111 +219,10 @@ public abstract class Media implements Parcelable {
         return -1;
     }
 
-//    @RequiresApi(api = Build.VERSION_CODES.R)
-//    public static void getAllMedia(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList) {
-//        // get all pic and vid
-//        String[] projection = {
-//                MediaStore.MediaColumns.DATA,
-//                MediaStore.Files.FileColumns.PARENT,
-//                MediaStore.MediaColumns._ID,
-//                MediaStore.Files.FileColumns.DISPLAY_NAME,
-//                MediaStore.Files.FileColumns.MEDIA_TYPE,
-//                MediaStore.MediaColumns.SIZE,
-//                MediaStore.MediaColumns.DATE_ADDED,
-//                MediaStore.MediaColumns.RESOLUTION,
-//                MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-//                MediaStore.MediaColumns.DURATION,
-//                MediaStore.Files.FileColumns.DISC_NUMBER
-//        };
-//        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-//                + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-//                + " OR "
-//                + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-//                + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
-//        int column_index_data;
-//        @SuppressLint("Recycle") Cursor cursor = context.getApplicationContext().getContentResolver().query(
-//                MediaStore.Files.getContentUri("external"),
-//                projection,
-//                selection,
-//                null, // Selection args (none).
-//                MediaStore.Files.FileColumns.DATE_ADDED + " DESC" // Sort order.
-//        );
-//
-//        float[] coordinate;
-//        String location = null;
-//        String absolutePathOfImage;
-//        while (cursor.moveToNext()) {
-//            absolutePathOfImage = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
-//
-//            // get location of media
-//            try {
-//                ExifInterface exifInterface = new ExifInterface(absolutePathOfImage);
-//                coordinate = new float[2];
-//                exifInterface.getLatLong(coordinate);
-//                location = getAddress(coordinate[0], coordinate[1], context);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            // file name
-//            String fileName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
-//            // media type
-//            int mediaType = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE));
-//            // size of media
-//            String size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE));
-//            // data added
-//            String date = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED));
-//            // resolution
-//            String resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RESOLUTION));
-//
-//            long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
-//            //directory of file
-//            String bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME));
-//
-//            int orientation = Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.ORIENTATION)));
-//
-//
-//            Uri contentUri;
-//            Media nextMedia = null;
-//            if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
-//                // get duration of video
-//                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
-//
-//                // get thumbnail video
-//                contentUri = ContentUris.withAppendedId(
-//                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
-//
-//                nextMedia = new VideoInfo(contentUri, size, date, resolution, MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO, fileName, location, duration, orientation);
-//                mediaArrayList.add(nextMedia);
-//
-//            } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
-//                // get thumbnail img
-//
-//                contentUri = ContentUris.withAppendedId(
-//                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-//
-//                nextMedia = new ImageInfo(contentUri, size, date, resolution, MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO, fileName, location, orientation);
-//                mediaArrayList.add(nextMedia);
-//            }
-//
-//            // check if bucket name is existed
-//            if (bucketName == null) {
-//                bucketName = "0";
-//            }
-//            int pos = findAlbumPos(defaultAlbumArrayList, bucketName);
-//            if (pos == -1) {
-//                defaultAlbumArrayList.add(new DefaultAlbum(absolutePathOfImage, bucketName));
-//                pos = defaultAlbumArrayList.size() - 1;
-//            }
-//            if (defaultAlbumArrayList != null)
-//                defaultAlbumArrayList.get(pos).addMedia(nextMedia);
-//
-//        }
-//    }
 
     //TODO: FIX THIS
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public static void getAllMediaUri(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList, HashSet<String> favoriteMediaHashSet) {
+    public static void getAllMediaUriAbovePI29(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList, HashSet<String> favoriteMediaHashSet) {
         // get all pic and vid
         String[] projection = {
                 MediaStore.MediaColumns.DATA,
@@ -352,31 +251,6 @@ public abstract class Media implements Parcelable {
 
         while (cursor.moveToNext()) {
 
-            //TODO: delete this block test
-//            double[] coordinate;
-//            String location = null;
-//            String absolutePathOfImage = "/storage/self/primary/DCIM/Camera/20210423_000549.jpg";
-//
-//            // get location of media
-//            try {
-//                ExifInterface exifInterface = new ExifInterface(absolutePathOfImage);
-//                String lat = ExifInterface.TAG_GPS_LATITUDE;
-//                String lon = ExifInterface.TAG_GPS_LONGITUDE;
-//                lat = exifInterface.getAttribute(lat);
-//                lon = exifInterface.getAttribute(lon);
-//                coordinate = exifInterface.getLatLong();
-//                if(coordinate!=null){
-//                    Log.e("TAG", "getAllMediaUri: ");
-//                }
-//
-//                location = getAddress(coordinate[0], coordinate[1], context);
-//                if(location!=null){
-//                    Log.e("", "OH YEAH" );
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-
             String fileName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME));
 
             String relativePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH));
@@ -385,7 +259,7 @@ public abstract class Media implements Parcelable {
 
             long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
 
-            String dataAdded =  cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED));
+            String dataAdded = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED));
             //directory of file
             String bucketName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME));
 
@@ -403,7 +277,7 @@ public abstract class Media implements Parcelable {
                 contentUri = ContentUris.withAppendedId(
                         MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
                 // check if media is favorite
-                if (favoriteMediaHashSet.contains(contentUri.toString())) {
+                if (favoriteMediaHashSet != null && favoriteMediaHashSet.contains(contentUri.toString())) {
                     isFavorite = true;
                 }
                 nextMedia = new VideoInfo(contentUri, null, dataAdded, null, mediaType, fileName, null, duration, orientation, isFavorite, isTrash);
@@ -417,23 +291,8 @@ public abstract class Media implements Parcelable {
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
 
                 String location = null;
-//                double[] coordinate;
-//                try {
-//                    geoUri = MediaStore.setRequireOriginal(contentUri);
-//                    stream = context.getContentResolver().openInputStream(geoUri);
-//                    if (stream != null) {
-//                        exifInterface = new ExifInterface(stream);
-//                        coordinate = exifInterface.getLatLong();
-//                        if (coordinate != null) {
-//                            location = getAddress(coordinate[0], coordinate[1], context);
-//                        }
-//                        // Don't reuse the stream associated with the instance of "ExifInterface".
-//                        stream.close();
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-                if (favoriteMediaHashSet.contains(contentUri.toString())) {
+
+                if (favoriteMediaHashSet != null && favoriteMediaHashSet.contains(contentUri.toString())) {
                     isFavorite = true;
                 }
                 nextMedia = new ImageInfo(contentUri, null, dataAdded, null, mediaType, fileName, location, orientation, isFavorite, isTrash);
@@ -446,6 +305,104 @@ public abstract class Media implements Parcelable {
         cursor.close();
     }
 
+    public static void getAllMediaUri(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList, HashSet<String> favoriteMediaHashSet) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
+            getAllMediaUriAbovePI29(context, mediaArrayList, defaultAlbumArrayList, favoriteMediaHashSet);
+        else
+            getAllMediaUriBelowAPI29(context, mediaArrayList, defaultAlbumArrayList, favoriteMediaHashSet);
+
+    }
+
+    private static void getAllMediaUriBelowAPI29(Context context, ArrayList<Media> mediaArrayList, ArrayList<DefaultAlbum> defaultAlbumArrayList, HashSet<String> favoriteMediaHashSet) {
+        // get all pic and vid
+        String[] projection = {
+                MediaStore.MediaColumns.DATA,
+                MediaStore.MediaColumns._ID,
+                MediaStore.Files.FileColumns.DISPLAY_NAME,
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                MediaStore.MediaColumns.DATE_ADDED,
+                //MediaStore.MediaColumns.DURATION,
+                //MediaStore.MediaColumns.ORIENTATION,
+        };
+        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                + " OR "
+                + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+        int column_index_data;
+        @SuppressLint("Recycle") Cursor cursor = context.getApplicationContext().getContentResolver().query(
+                MediaStore.Files.getContentUri("external"),
+                projection,
+                selection,
+                null, // Selection args (none).
+                MediaStore.Files.FileColumns.DATE_ADDED + " DESC" // Sort order.
+        );
+
+        FFmpegMediaMetadataRetriever mmr = new FFmpegMediaMetadataRetriever();
+
+        while (cursor.moveToNext()) {
+
+
+            String absolutePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
+
+            Uri uri = Uri.fromFile(new File(absolutePath));
+
+            String[] detailPath = FileHandler.getPathDetail(absolutePath);
+
+            String relativePath = detailPath[0];
+
+            String bucketName = detailPath[1];
+
+            String fileName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME));
+            // media type
+            int mediaType = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE));
+
+            long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID));
+
+            String dataAdded = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED));
+            //directory of file
+
+            int orientation = 0;
+            boolean isFavorite = false;
+            boolean isTrash = false;
+
+            Uri contentUri;
+            Media nextMedia;
+            if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                // get duration of video
+                int duration = Integer.parseInt(mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION));
+
+                // get thumbnail video
+                contentUri = ContentUris.withAppendedId(
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
+                // check if media is favorite
+                if (favoriteMediaHashSet != null && favoriteMediaHashSet.contains(contentUri.toString())) {
+                    isFavorite = true;
+                }
+                nextMedia = new VideoInfo(contentUri, null, dataAdded, null, mediaType, fileName, null, duration, orientation, isFavorite, isTrash);
+                mediaArrayList.add(nextMedia);
+                int albumPos = addVideoToAlbumList(relativePath, bucketName, defaultAlbumArrayList, (VideoInfo) nextMedia);
+                if (albumPos != -1)
+                    nextMedia.setAlbumIn(albumPos);
+
+            } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                contentUri = ContentUris.withAppendedId(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+                String location = null;
+
+                if (favoriteMediaHashSet != null && favoriteMediaHashSet.contains(contentUri.toString())) {
+                    isFavorite = true;
+                }
+                nextMedia = new ImageInfo(contentUri, null, dataAdded, null, mediaType, fileName, location, orientation, isFavorite, isTrash);
+                mediaArrayList.add(nextMedia);
+                int albumPos = addImageToAlbumList(relativePath, bucketName, defaultAlbumArrayList, (ImageInfo) nextMedia);
+                if (albumPos != -1)
+                    nextMedia.setAlbumIn(albumPos);
+            }
+        }
+        cursor.close();
+    }
 
     public void getMediaDetail(DefaultAlbum albumIn, ContentResolver contentResolver, Context context) {
         String[] projection = {
@@ -475,12 +432,12 @@ public abstract class Media implements Parcelable {
         }
 
         String location = "";
-        float [] coordination = new float[2];
+        float[] coordination = new float[2];
         ExifInterface exifInterface = null;
         try {
             exifInterface = new ExifInterface(filePath);
-            if(exifInterface.getLatLong(coordination))
-                location = getAddress(coordination[0],coordination[1], context);
+            if (exifInterface.getLatLong(coordination))
+                location = getAddress(coordination[0], coordination[1], context);
             else
                 location = "unknown";
         } catch (IOException e) {
@@ -494,6 +451,7 @@ public abstract class Media implements Parcelable {
         this.setLocation(location);
         cursor.close();
     }
+
 
 
     public static String getAddress(double lat, double lng, Context context) {
@@ -597,7 +555,7 @@ public abstract class Media implements Parcelable {
         return mediaCollection;
     }
 
-    public void deleteMedia(Context context){
+    public void deleteMedia(Context context) {
         try {
             ContentResolver resolver = context.getContentResolver();            // Remove a specific media item.
             Uri imageUri = this.getUri();                        // URI of the image to remove.
@@ -615,4 +573,52 @@ public abstract class Media implements Parcelable {
             Log.e("Error", e.getMessage());
         }
     }
+
+    public static void getFavorite(ArrayList<Media> allMediaArrayList, ArrayList<Media> mediaArrayList, HashSet<String> favoriteMediaHashSet) {
+        mediaArrayList.clear();
+        for (int i = 0; i < allMediaArrayList.size(); i++) {
+            if (favoriteMediaHashSet.contains(allMediaArrayList.get(i).getUri().toString())) {
+                mediaArrayList.add(allMediaArrayList.get(i));
+            }
+        }
+    }
+
+    public static void getVideo(ArrayList<Media> allMediaArrayList, ArrayList<Media> mediaArrayList) {
+        mediaArrayList.clear();
+        for (int i = 0; i < allMediaArrayList.size(); i++) {
+            if (allMediaArrayList.get(i).getMEDIA_TYPE() == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                mediaArrayList.add(allMediaArrayList.get(i));
+            }
+        }
+    }
+
+    public static void getImage(ArrayList<Media> allMediaArrayList, ArrayList<Media> mediaArrayList) {
+        mediaArrayList.clear();
+        for (int i = 0; i < allMediaArrayList.size(); i++) {
+            if (allMediaArrayList.get(i).getMEDIA_TYPE() == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                mediaArrayList.add(allMediaArrayList.get(i));
+            }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public static boolean isDiffDate(Media media1, Media media2, int mode) {
+        try {
+            Date date1 = Media.getDate(Long.parseLong(media1.getDate()));
+            Date date2 = Media.getDate(Long.parseLong(media2.getDate()));
+            Calendar c = Calendar.getInstance();
+            c.setTime(date1);
+            int a = c.get(Calendar.DAY_OF_MONTH);
+            c.setTime(date2);
+            int b = c.get(Calendar.DAY_OF_MONTH);
+            if (a != b) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
 }

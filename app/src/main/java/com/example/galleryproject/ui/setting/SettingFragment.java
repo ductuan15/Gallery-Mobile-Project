@@ -30,6 +30,8 @@ public class SettingFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.fragment_setting, rootKey);
 
+        ((MainActivity)requireActivity()).toolbar.setTitle(R.string.title_setting);
+
         preferences = PreferenceManager.getDefaultSharedPreferences(requireContext());              //get preference
 
         list_theme = (ListPreference) findPreference("theme_selection");

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,8 +32,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.galleryproject.AlbumSelectDialogFragment;
 import com.example.galleryproject.MainActivity;
 import com.example.galleryproject.R;
+import com.example.galleryproject.ThumbnailMediaDecoration;
 import com.example.galleryproject.ThumbnailPictureAdapter;
 import com.example.galleryproject.SlideMediaActivity;
+import com.example.galleryproject.data.DefaultAlbum;
 import com.example.galleryproject.data.Media;
 import com.example.galleryproject.ui.DetailsLookup;
 
@@ -44,14 +47,23 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
     private AllPicViewModel allPicViewModel;
     private RecyclerView thumbnailPicGridView;
     private ThumbnailPictureAdapter thumbnailPictureAdapter;
-
+    ThumbnailMediaDecoration thumbnailMediaDecoration;
     ArrayList<Media> mediaArrayList;
     SelectionTracker<Long> selectionTracker;
 
     SwipeRefreshLayout swipeRefreshLayout;
     boolean isSelectionMode = false;
-    static int[] numsCol = {1,3,7};
+    static int[] numsCol = {1, 3, 7};
     int curNumColPos = 1;
+    public final static int VIEW_MODE_ALL = 0;
+    public final static int VIEW_MODE_FAV = 1;
+    public final static int VIEW_MODE_VID = 2;
+    public final static int VIEW_MODE_IMG = 3;
+
+    //support spanning
+    int spannedCol = 0;
+
+    int viewMode = VIEW_MODE_ALL;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,10 +71,12 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
         setHasOptionsMenu(true);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         allPicViewModel = new ViewModelProvider(this).get(AllPicViewModel.class);
+        viewMode = ((MainActivity) requireActivity()).viewMode;
+        // set title for top app bar
+        setTopBarTitle();
         View root = inflater.inflate(R.layout.fragment_allpic, container, false);
         int orientation = requireActivity().getResources().getConfiguration().orientation;
 
@@ -77,13 +91,30 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
         StableIdKeyProvider keyProvider = new StableIdKeyProvider(this.thumbnailPicGridView);
         this.thumbnailPictureAdapter = new ThumbnailPictureAdapter(this.mediaArrayList, this.getContext(), this.selectionTracker, this);
 
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), numsCol[curNumColPos]);
+//        thumbnailMediaDecoration = new ThumbnailMediaDecoration(numsCol[curNumColPos]);
         this.thumbnailPicGridView.setHasFixedSize(true);
-        this.thumbnailPicGridView.setLayoutManager(new GridLayoutManager(getActivity(),numsCol[curNumColPos]));
+        this.thumbnailPicGridView.setLayoutManager(gridLayoutManager);
+//        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+//            @Override
+//            public void setSpanIndexCacheEnabled(boolean cacheSpanIndices) {
+//                super.setSpanIndexCacheEnabled(cacheSpanIndices);
+//            }
+//
+//            @Override
+//            public int getSpanSize(int position) {
+//                if (position < mediaArrayList.size() - 2 && Media.isDiffDate(mediaArrayList.get(position), mediaArrayList.get(position + 1), 0)) {
+//                    //thumbnailPictureAdapter.setShowDatePos(position + 1);
+//                    View view = gridLayoutManager.findViewByPosition(position - 1);
+//                    if(view != null){
+//                        return 2;
+//                    }
+//                }
+//                return 1;
+//            }
+//        });
         this.thumbnailPicGridView.setAdapter(this.thumbnailPictureAdapter);
 
-
-
-        // set up multiselect
         selectionTracker = new SelectionTracker.Builder<>(
                 "media_select",
                 this.thumbnailPicGridView,
@@ -116,6 +147,18 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
         setupSwipeRefreshLayout();
         return root;
 
+    }
+
+    private void setTopBarTitle() {
+        if (viewMode == VIEW_MODE_ALL) {
+            ((MainActivity) requireActivity()).toolbar.setTitle(R.string.title_allpic);
+        } else if (viewMode == VIEW_MODE_FAV) {
+            ((MainActivity) requireActivity()).toolbar.setTitle(R.string.favorite);
+        } else if (viewMode == VIEW_MODE_VID) {
+            ((MainActivity) requireActivity()).toolbar.setTitle(R.string.video);
+        } else if (viewMode == VIEW_MODE_IMG) {
+            ((MainActivity) requireActivity()).toolbar.setTitle(R.string.image);
+        }
     }
 
     private void setupSwipeRefreshLayout() {
@@ -153,16 +196,14 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.change_layout_opt){
-            curNumColPos = (curNumColPos + 1)% numsCol.length;
-            if(numsCol[curNumColPos] > 5){
+        if (item.getItemId() == R.id.change_layout_opt) {
+            curNumColPos = (curNumColPos + 1) % numsCol.length;
+            if (numsCol[curNumColPos] > 5) {
                 thumbnailPictureAdapter.setIsSmall(true);
-            }else{
+            } else {
                 thumbnailPictureAdapter.setIsSmall(false);
             }
-            this.thumbnailPicGridView.setLayoutManager(new GridLayoutManager(getActivity(),numsCol[curNumColPos]));
-
-
+            this.thumbnailPicGridView.setLayoutManager(new GridLayoutManager(getActivity(), numsCol[curNumColPos]));
         }
         // move to album mode
         else if (item.getItemId() == R.id.move_to_album_opt) {
@@ -174,23 +215,22 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
             newFragment.show(fragmentManager, "dialog");
         }
         // copy to album mode
-        else if (item.getItemId() == R.id.copy_to_album_opt){
+        else if (item.getItemId() == R.id.copy_to_album_opt) {
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             AlbumSelectDialogFragment newFragment = new AlbumSelectDialogFragment(((MainActivity) requireActivity()).defaultAlbumArrayList,
                     ((MainActivity) requireActivity()).mediaArrayList,
                     this.selectionTracker.getSelection(),
                     AlbumSelectDialogFragment.COPY_TO_ALBUM_MODE);
             newFragment.show(fragmentManager, "dialog");
-        }
-        else if (item.getItemId() == R.id.delete_opt){
+        } else if (item.getItemId() == R.id.delete_opt) {
 
             new AlertDialog.Builder(requireActivity())
                     .setTitle(R.string.ask_for_delete_title)
                     .setMessage(R.string.ask_for_delete_message)
                     .setPositiveButton("OK", (dialog, which) -> {
-                        for(Long l:selectionTracker.getSelection()){
-                            if (l < Integer.MAX_VALUE && l >= 0){
-                                int i = l.intValue(); 
+                        for (Long l : selectionTracker.getSelection()) {
+                            if (l < Integer.MAX_VALUE && l >= 0) {
+                                int i = l.intValue();
                                 mediaArrayList.get(i).deleteMedia(requireActivity());
                             }
                         }
@@ -216,8 +256,16 @@ public class AllPicFragment extends Fragment implements View.OnClickListener, On
         int pos = viewHolder.getAdapterPosition();
         Intent intent = new Intent(this.getActivity(), SlideMediaActivity.class);
         Bundle data = new Bundle();
+        if (((MainActivity) requireActivity()).viewMode != VIEW_MODE_ALL) {
+            DefaultAlbum album = new DefaultAlbum("", "");
+            album.setMediaArrayList(this.mediaArrayList);
+            data.putParcelable("curAlbum", album);
+            data.putInt("view_mode", SlideMediaActivity.VIEW_MODE_TYPE_MEDIA);
+        } else {
+            data.putInt("view_mode", SlideMediaActivity.VIEW_MODE_ALL);
+        }
         data.putInt("mediaPos", pos);
-        data.putBoolean("isSlideShow",false);
+        data.putBoolean("isSlideShow", false);
         intent.putExtras(data);
         startActivity(intent);
     }

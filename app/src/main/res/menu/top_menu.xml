@@ -10,10 +10,6 @@
         android:title="@string/title_slideshow">
     </item>
     <item
-        android:id="@+id/selectall"
-        android:title="@string/title_selectall">
-    </item>
-    <item
         android:id="@+id/gotocam"
         android:icon="@drawable/ic_baseline_camera_alt_24"
         app:showAsAction="always"
@@ -22,6 +18,6 @@
     <item
         android:id="@+id/go_to_secure_album"
         app:showAsAction= "withText"
-        android:title="@string/title_gotocam">
+        android:title="@string/title_gotoSecureAlbum">
     </item>
 </menu>

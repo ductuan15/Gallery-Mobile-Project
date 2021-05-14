@@ -30,6 +30,7 @@ public class AllAlbumFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
+
         View root = inflater.inflate(R.layout.fragment_allalbum, container, false);
         int colNum = 3;
         // TODO: replace by img and album name
@@ -42,7 +43,7 @@ public class AllAlbumFragment extends Fragment implements View.OnClickListener {
 //            ((MainActivity) requireActivity()).getAllDataSet();
 //        });
 
-
+        ((MainActivity)requireActivity()).toolbar.setTitle(R.string.title_allalbums);
         ThumbnailAlbumAdapter thumbnailAlbumAdapter = new ThumbnailAlbumAdapter(defaultAlbumArrayList, this, this.getContext());
         this.thumbnailAlbum_GridView = root.findViewById(R.id.grid_view_thumbnail_album);
         this.thumbnailAlbum_GridView.setLayoutManager(new GridLayoutManager(getActivity(), colNum, RecyclerView.HORIZONTAL, false));

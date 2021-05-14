@@ -14,12 +14,12 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/topAppBar"
+            android:id="@+id/mainTopAppBar"
             android:theme="@style/Theme.GalleryProject"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:menu="@menu/viewpicture_menu"
-            app:title="@string/app_name" />
+            app:navigationIcon="@drawable/ic_baseline_arrow_back_ios_24"
+            app:title=""/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -33,7 +33,8 @@
          android:fitsSystemWindows. -->
     <LinearLayout
         android:id="@+id/button_layout"
-        style="@style/Widget.Theme.GalleryProject.ButtonBar.Fullscreen"
+        style="@style/Theme.GalleryProject"
+        android:background="@color/white"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"

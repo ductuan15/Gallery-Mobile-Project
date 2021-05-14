@@ -28,6 +28,7 @@ public class DefaultAlbum implements Parcelable{
         albumName = in.readString();
     }
 
+
     public static final Creator<DefaultAlbum> CREATOR = new Creator<DefaultAlbum>() {
         @Override
         public DefaultAlbum createFromParcel(Parcel in) {
@@ -63,6 +64,10 @@ public class DefaultAlbum implements Parcelable{
         }
     }
 
+    public void setMediaArrayList(ArrayList<Media> mediaArrayList) {
+        this.mediaArrayList = mediaArrayList;
+    }
+
     public void addImageInfo(ImageInfo media) {
         try {
             this.mediaArrayList.add(media);
@@ -95,6 +100,9 @@ public class DefaultAlbum implements Parcelable{
 
     public String getAlbumPath() {return albumPath;}
 
+    public int getSize(){
+        return this.mediaArrayList.size();
+    }
     public Uri getUriThumbnail() {
         if(this.mediaArrayList.size() < 1){
             return null;

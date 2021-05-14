@@ -7,8 +7,19 @@
     android:padding="1dp"
     android:background="@drawable/selector_background">
 
+    <TextView
+        android:id="@+id/data_show_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone">
+
+    </TextView>
+
     <ImageView
-        tools:src="@tools:sample/backgrounds/scenic"
         android:id="@+id/thumbnail_pic_holder"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -16,7 +27,8 @@
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/data_show_text"
+        tools:src="@tools:sample/backgrounds/scenic" />
 
     <CheckBox
         android:id="@+id/checkBox"

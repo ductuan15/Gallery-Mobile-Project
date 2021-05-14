@@ -32,21 +32,35 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
     ArrayList<Media> mediaArrayList;
     ThumbnailAlbumAdapter thumbnailAlbumAdapter;
     Selection<Long> selectedItem;
+    int item = -1;
     private Toolbar toolbar;
     private final int actionMode;
     private String actionModeStr;
     public static int COPY_TO_ALBUM_MODE = 0;
     public static int MOVE_TO_ALBUM_MODE = 1;
+    public static int MOVE_FROM_SECURE = 2;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NORMAL, R.style.AppTheme_FullScreenDialog);
+        setStyle(DialogFragment.STYLE_NORMAL, R.style.Theme_GalleryProject);
     }
 
     public AlbumSelectDialogFragment(ArrayList<DefaultAlbum> defaultAlbumArrayList, ArrayList<Media> mediaArrayList, Selection<Long> selectedItem, int actionMode) {
         super();
         this.selectedItem = selectedItem;
+        this.defaultAlbumArrayList = defaultAlbumArrayList;
+        this.mediaArrayList = mediaArrayList;
+        this.actionMode = actionMode;
+        if (this.actionMode == AlbumSelectDialogFragment.COPY_TO_ALBUM_MODE)
+            this.actionModeStr = "Copy to album";
+        else if (this.actionMode == AlbumSelectDialogFragment.MOVE_TO_ALBUM_MODE)
+            this.actionModeStr = "Move to album";
+    }
+    public AlbumSelectDialogFragment(ArrayList<DefaultAlbum> defaultAlbumArrayList, ArrayList<Media> mediaArrayList, int item, int actionMode) {
+        super();
+        this.item = item;
         this.defaultAlbumArrayList = defaultAlbumArrayList;
         this.mediaArrayList = mediaArrayList;
         this.actionMode = actionMode;
@@ -82,14 +96,13 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        super.onViewCreated(view, savedInstanceState);
+
         toolbar.setNavigationOnClickListener(v -> dismiss());
         toolbar.setTitle(actionModeStr);
         toolbar.inflateMenu(R.menu.album_selection_menu);
         toolbar.setOnMenuItemClickListener(this);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         if (item.getItemId() == R.id.cancel_action_opt) {
@@ -129,25 +142,42 @@ public class AlbumSelectDialogFragment extends DialogFragment implements Toolbar
     public void onClick(View v) {
         ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder viewHolder = (ThumbnailAlbumAdapter.ThumbnailAlbumViewHolder) v.getTag();
         int pos = viewHolder.getAdapterPosition();
-        for (Long l : selectedItem) {
-            if (l < Integer.MAX_VALUE && l >= 0) {
-                int i = l.intValue();
-                Media media = this.mediaArrayList.get(i);
-                int actionStatus;
-                if (this.actionMode == AlbumSelectDialogFragment.COPY_TO_ALBUM_MODE) {
-                    actionStatus = FileHandler.copyFile(media,this.defaultAlbumArrayList.get(pos).getAlbumPath(), requireActivity());
-                } else {
-                    actionStatus = FileHandler.moveFile(media, defaultAlbumArrayList.get(pos), defaultAlbumArrayList.get(media.getAlbumIn()), requireActivity());
-                }
-                if (actionStatus == 0) {
-                    Toast.makeText(requireActivity(), "Failed", Toast.LENGTH_LONG).show();
-                } else if (actionStatus == 1) {
-                    Toast.makeText(requireActivity(), "Successfully", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(requireActivity(), "File existed", Toast.LENGTH_LONG).show();
+        if(selectedItem == null){
+            Media media = this.mediaArrayList.get(item);
+            int actionStatus;
+            actionStatus = FileHandler.moveFromSecureAlbum(media,this.defaultAlbumArrayList.get(pos),requireActivity());
+            if (actionStatus == 0) {
+                Toast.makeText(requireActivity(), "Failed", Toast.LENGTH_LONG).show();
+            } else if (actionStatus == 1) {
+                Toast.makeText(requireActivity(), "Successfully", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(requireActivity(), "File existed", Toast.LENGTH_LONG).show();
+            }
+        }else{
+
+            for (Long l : selectedItem) {
+                if (l < Integer.MAX_VALUE && l >= 0) {
+                    int i = l.intValue();
+                    Media media = this.mediaArrayList.get(i);
+                    int actionStatus = 0;
+                    if (this.actionMode == AlbumSelectDialogFragment.COPY_TO_ALBUM_MODE) {
+                        actionStatus = FileHandler.copyFile(media,this.defaultAlbumArrayList.get(pos).getAlbumPath(), requireActivity());
+                    } else  if (this.actionMode == AlbumSelectDialogFragment.MOVE_TO_ALBUM_MODE) {
+                        actionStatus = FileHandler.moveFile(media, defaultAlbumArrayList.get(pos), defaultAlbumArrayList.get(media.getAlbumIn()), requireActivity());
+                    } else if (this.actionMode == AlbumSelectDialogFragment.MOVE_FROM_SECURE) {
+                        actionStatus = FileHandler.moveFromSecureAlbum(media,this.defaultAlbumArrayList.get(pos),requireActivity());
+                    }
+                    if (actionStatus == 0) {
+                        Toast.makeText(requireActivity(), "Failed", Toast.LENGTH_LONG).show();
+                    } else if (actionStatus == 1) {
+                        Toast.makeText(requireActivity(), "Successfully", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireActivity(), "File existed", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         }
+
         this.dismiss();
     }
 }

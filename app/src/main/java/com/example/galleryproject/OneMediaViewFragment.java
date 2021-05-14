@@ -3,7 +3,10 @@ package com.example.galleryproject;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.RectF;
+import android.media.ExifInterface;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,7 +31,9 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.example.galleryproject.data.Media;
 import com.google.android.material.chip.Chip;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 
 public class OneMediaViewFragment extends Fragment implements View.OnClickListener {
@@ -65,21 +70,28 @@ public class OneMediaViewFragment extends Fragment implements View.OnClickListen
         if (this.media.getMEDIA_TYPE() == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
             this.photoView.setImage(ImageSource.uri(this.media.getUri()));
         }else{
+            Bitmap thumbnail = null;
             try {
-                Bitmap thumbnail = requireActivity().getApplicationContext().getContentResolver().loadThumbnail(
+                thumbnail = requireActivity().getApplicationContext().getContentResolver().loadThumbnail(
                         this.media.getUri(),
                         this.screenSize,
                         null
                 );
+            } catch (IOException e) {
+                String path = requireContext().getDataDir() + File.separator + FileHandler.SECURE_ALBUM_INTERNAL_DIR_NAME + File.separator + media.getFileName();
+                Log.e("TAG",path );
+                File file = new File(path);
+                thumbnail= ThumbnailUtils.createVideoThumbnail(path,MediaStore.Images.Thumbnails.MINI_KIND);
+
+            }
+            if(thumbnail != null){
                 Chip chip = root.findViewById(R.id.playVideo_chip);
                 chip.setVisibility(View.VISIBLE);
                 chip.setOnClickListener(this);
                 this.photoView.setImage(ImageSource.bitmap(thumbnail));
                 this.photoView.setOrientation(this.media.getOrientation());
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e("", "onCreateView: ERROR");
             }
+
         }
 
         return root;

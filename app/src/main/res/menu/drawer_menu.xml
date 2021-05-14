@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/drawer_home"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/home"
+        app:showAsAction="always">
+    </item>
+    <item
+        android:id="@+id/drawer_favorite"
+        android:icon="@drawable/ic_baseline_favorite_red24"
+        android:title="@string/favorite"
+        app:showAsAction="always">
+    </item>
+    <item
+        android:id="@+id/drawer_image"
+        android:icon="@drawable/ic_baseline_image_24"
+        android:title="@string/image"
+        app:showAsAction="ifRoom">
+    </item>
+    <item
+        android:id="@+id/drawer_video"
+        android:icon="@drawable/ic_baseline_videocam_24"
+        android:title="@string/video"
+        app:showAsAction="ifRoom">
+    </item>
+</menu>

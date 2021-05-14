@@ -36,8 +36,8 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
     private ArrayList<Media> mediaArrayList;
     private final Context context;
     private SelectionTracker<Long> selectionTracker;
-    private Date curDate;
     // this interface will listen to click
+    int showDatePos = -1;
     private final View.OnClickListener onItemClickListener;
 
     static int VIEW_BY_DATE = 1;
@@ -64,11 +64,8 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
             super(itemView);
             this.onItemClickListener = onItemClickListener;
             this.mediaType = mediaType;
-            if(mediaType == VIEW_HOLDER_DATE_TYPE){
-               textDate = itemView.findViewById(R.id.data_show_text);
-               return;
-            }
-            else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+            textDate = itemView.findViewById(R.id.data_show_text);
+            if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                 this.imageView = itemView.findViewById(R.id.thumbnail_video_holder);
                 videoDurationChip = itemView.findViewById(R.id.duration_chip);
             } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE){
@@ -106,12 +103,6 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
 
     public void setMediaArrayList(ArrayList<Media> mediaArrayList) {
         this.mediaArrayList = mediaArrayList;
-        if(mediaArrayList.size() == 0) return;
-        try {
-            this.curDate =  simpleDateFormat.parse(mediaArrayList.get(0).getDate());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
         this.notifyDataChange();
     }
 
@@ -121,10 +112,8 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
         View view;
         if (viewType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO)
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_video, parent, false);
-        else if (viewType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE)
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_pic, parent, false);
         else
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.date_holder, parent, false);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_pic, parent, false);
         return new ThumbnailPictureViewHolder(view, viewType, this.onItemClickListener);
     }
 
@@ -177,8 +166,8 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
                     holder.videoDurationChip.setText(curMedia.getDuration());
                     holder.videoDurationChip.setChipIconResource(R.drawable.ic_baseline_play_arrow_24);
                 }
-
             }
+
             Glide.with(this.context)
                     .load(curMedia.getUri())
                     .placeholder(R.drawable.ic_noun_cat_search_232263)
@@ -227,5 +216,9 @@ public class ThumbnailPictureAdapter extends RecyclerView.Adapter<ThumbnailPictu
 
     public void setIsSmall(boolean isSmall) {
         this.isSmall = isSmall;
+    }
+
+    public void setShowDatePos(int showDatePos) {
+        this.showDatePos = showDatePos;
     }
 }

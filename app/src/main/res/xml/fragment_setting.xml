@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <ListPreference
 
         android:entries="@array/Languages"
         android:entryValues="@array/languageAlias"
         android:key="@string/language_key"
-        android:title="@string/title_change_Language" />
+        android:title="@string/title_change_Language"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_baseline_language_24"/>
     <ListPreference
 
         android:defaultValue="1"
         android:entries="@array/Theme"
         android:entryValues="@array/Theme"
         android:key="@string/theme_key"
-        android:title="@string/title_change_Theme" />
+        android:title="@string/title_change_Theme"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_baseline_style_24"/>
+    />
 
 
 </androidx.preference.PreferenceScreen>

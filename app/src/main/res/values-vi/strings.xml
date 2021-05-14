@@ -49,6 +49,15 @@
     <string name="change_password">Change password</string>
     <string name="unlock_all_media">Mở khoá toàn bộ</string>
     <string name="stop_slideshow">Dừng trình diễn</string>
+    <string name="unlock_media">Mở khoá media</string>
+    <string name="favorite">Ưu thích</string>
+    <string name="image">Hình ảnh</string>
+    <string name="secret_album">Secret album</string>
+    <string name="cannot_use_camera">Can\'t use camera</string>
+    <string name="Delete_fail">Fail to delete</string>
+    <string name="deleted">Deleted</string>
+    <string name="home">Home</string>
+    <string name="title_gotoSecureAlbum">Truy cập album ẩn</string>
 
 
 </resources>

@@ -12,6 +12,9 @@
         android:layout_height="wrap_content">
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/grid_view_thumbnail_pic"
+            android:scrollbars="vertical"
+            android:scrollbarSize="5dp"
+            android:scrollbarThumbVertical="@color/pink_red"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"

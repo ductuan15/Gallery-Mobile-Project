@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/unlock_opt"
+        android:title="@string/unlock_media"
+        android:icon="@drawable/ic_baseline_lock_open_24"
+        app:showAsAction="always">
+    </item>
+</menu>

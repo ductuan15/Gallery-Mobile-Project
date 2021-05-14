@@ -29,6 +29,8 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
     public static class ThumbnailAlbumViewHolder extends RecyclerView.ViewHolder {
         final ImageView imageView;
         final TextView albumNameTextView;
+        final TextView albumSizeTextView;
+
         public ThumbnailAlbumViewHolder(@NonNull View itemView,View.OnClickListener onItemClickListener) {
             super(itemView);
             // set tag as itemview to get itemview when click
@@ -37,6 +39,10 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
             itemView.setOnClickListener(onItemClickListener);
             this.imageView = (ImageView) itemView.findViewById(R.id.thumbnail_album_holder);
             this.albumNameTextView = (TextView) itemView.findViewById(R.id.album_name_holder);
+            this.albumSizeTextView = itemView.findViewById(R.id.number_media_holder);
+        }
+        public View getView(){
+            return this.itemView;
         }
 
     }
@@ -81,8 +87,13 @@ public class ThumbnailAlbumAdapter extends RecyclerView.Adapter<ThumbnailAlbumAd
         }
         // TODO: replace by the name of albums
         holder.albumNameTextView.setText(defaultAlbum.getAlbumName());
+        holder.albumSizeTextView.setText(String.valueOf(defaultAlbum.getSize()));
     }
 
+
+    public void setDefaultAlbumArrayList(ArrayList<DefaultAlbum> defaultAlbumArrayList) {
+        this.defaultAlbumArrayList = defaultAlbumArrayList;
+    }
 
     //return number of items
     @Override
